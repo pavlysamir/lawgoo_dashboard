@@ -1,0 +1,14 @@
+Analyzing lowgos_dashboard...
+
+  error - lib\features\auth\domain\repositories\auth_repository.dart:2:8 - Target of URI doesn't exist: '../../../core/error/failures.dart'. Try creating the file referenced by the URI, or try using a URI for a file that does exist. - uri_does_not_exist
+  error - lib\features\auth\domain\repositories\auth_repository.dart:6:17 - The name 'Failure' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'Failure'. - non_type_as_type_argument
+  error - lib\features\auth\domain\usecases\login_admin.dart:2:8 - Target of URI doesn't exist: '../../../core/error/failures.dart'. Try creating the file referenced by the URI, or try using a URI for a file that does exist. - uri_does_not_exist
+  error - lib\features\auth\domain\usecases\login_admin.dart:11:17 - The name 'Failure' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'Failure'. - non_type_as_type_argument
+  error - lib\features\auth\presentation\bloc\auth_cubit.dart:16:41 - The argument type 'Object?' can't be assigned to the parameter type 'Failure'.  - argument_type_not_assignable
+   info - lib\core\error\failures.dart:13:9 - Parameter 'message' could be a super parameter. Trying converting 'message' to a super parameter. - use_super_parameters
+   info - lib\core\error\failures.dart:17:9 - Parameter 'message' could be a super parameter. Trying converting 'message' to a super parameter. - use_super_parameters
+   info - lib\core\error\failures.dart:21:9 - Parameter 'message' could be a super parameter. Trying converting 'message' to a super parameter. - use_super_parameters
+   info - lib\core\error\failures.dart:25:9 - Parameter 'message' could be a super parameter. Trying converting 'message' to a super parameter. - use_super_parameters
+   info - lib\core\error\failures.dart:29:9 - Parameter 'message' could be a super parameter. Trying converting 'message' to a super parameter. - use_super_parameters
+
+10 issues found.
