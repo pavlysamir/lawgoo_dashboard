@@ -5,11 +5,7 @@ class UserTable extends StatelessWidget {
   final List<UserEntity> users;
   final bool isLoading;
 
-  const UserTable({
-    super.key,
-    required this.users,
-    this.isLoading = false,
-  });
+  const UserTable({super.key, required this.users, this.isLoading = false});
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +29,11 @@ class UserTable extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
-                _HeaderCell(text: 'العمليات', flex: 1),
-                _HeaderCell(text: 'تاريخ الانضمام', flex: 2),
-                _HeaderCell(text: 'عدد المستويات المكتملة', flex: 2),
-                _HeaderCell(text: 'البريد الالكتروني', flex: 3),
                 _HeaderCell(text: 'المستخدم', flex: 3),
+                _HeaderCell(text: 'البريد الالكتروني', flex: 3),
+                _HeaderCell(text: 'عدد المستويات المكتملة', flex: 2),
+                _HeaderCell(text: 'تاريخ الانضمام', flex: 2),
+                _HeaderCell(text: 'العمليات', flex: 1),
               ],
             ),
           ),
@@ -61,57 +57,24 @@ class UserTable extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Operations
-                      Expanded(
-                        flex: 1,
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                        ),
-                      ),
-                      // Join Date
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '${user.createdAt.day} أكتوبر',
-                              style: const TextStyle(fontFamily: 'Cairo', fontSize: 13),
-                            ),
-                            Text(
-                              '${user.createdAt.year}',
-                              style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Completed Levels
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          user.countCompletedLevels.toString(),
-                          textAlign: TextAlign.end,
-                          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      // Email
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          user.email,
-                          textAlign: TextAlign.end,
-                          style: const TextStyle(fontSize: 13, color: Colors.black54),
-                        ),
-                      ),
                       // User Info
                       Expanded(
                         flex: 3,
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage: user.profileImage != null
+                                  ? NetworkImage(user.profileImage!)
+                                  : null,
+                              child: user.profileImage == null
+                                  ? const Icon(Icons.person)
+                                  : null,
+                            ),
+                            const SizedBox(width: 12),
                             Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   user.name,
@@ -122,21 +85,73 @@ class UserTable extends StatelessWidget {
                                 ),
                                 Text(
                                   'ID: #USR-${user.id.substring(0, min(user.id.length, 4))}',
-                                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ],
                             ),
-                            const SizedBox(width: 12),
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundImage: user.profileImage != null
-                                  ? NetworkImage(user.profileImage!)
-                                  : null,
-                              child: user.profileImage == null
-                                  ? const Icon(Icons.person)
-                                  : null,
+                          ],
+                        ),
+                      ),
+                      // Email
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          user.email,
+                          textAlign: TextAlign.start,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
+                      // Completed Levels
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          user.countCompletedLevels.toString(),
+                          textAlign: TextAlign.start,
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      // Join Date
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${user.createdAt.day}-${user.createdAt.month}',
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 13,
+                              ),
+                            ),
+                            Text(
+                              '${user.createdAt.year}',
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
+                        ),
+                      ),
+                      // Operations
+                      Expanded(
+                        flex: 1,
+                        child: IconButton(
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ],
@@ -162,7 +177,7 @@ class _HeaderCell extends StatelessWidget {
       flex: flex,
       child: Text(
         text,
-        textAlign: TextAlign.end,
+        textAlign: TextAlign.start,
         style: const TextStyle(
           color: Colors.grey,
           fontFamily: 'Cairo',

@@ -31,7 +31,7 @@ class DashboardSearchBar extends StatelessWidget {
             fontSize: 14,
           ),
           border: InputBorder.none,
-          suffixIcon: Icon(Icons.search, color: Colors.grey),
+          prefixIcon: const Icon(Icons.search, color: Colors.grey),
         ),
       ),
     );
