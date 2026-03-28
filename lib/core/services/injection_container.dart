@@ -15,6 +15,7 @@ import '../../features/dashboard/domain/usecases/get_dashboard_stats.dart';
 import '../../features/dashboard/domain/usecases/get_users.dart';
 import '../../features/dashboard/domain/usecases/search_users.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_cubit.dart';
+import '../../features/users/presentation/bloc/users_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -57,6 +58,13 @@ Future<void> initDependencies() async {
   getIt.registerFactory(
     () => DashboardCubit(
       getDashboardStats: getIt(),
+      getUsers: getIt(),
+      searchUsers: getIt(),
+    ),
+  );
+
+  getIt.registerFactory(
+    () => UsersCubit(
       getUsers: getIt(),
       searchUsers: getIt(),
     ),
