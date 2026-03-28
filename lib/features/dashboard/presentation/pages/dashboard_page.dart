@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lowgos_dashboard/core/widgets/gradient_background.dart';
+import '../../../auth/presentation/bloc/auth_cubit.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../bloc/dashboard_cubit.dart';
 import '../bloc/dashboard_state.dart';
@@ -25,128 +28,69 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        body: GradientBackground(
-          child: Row(
-            children: [
-              SideMenu(
-                selectedIndex: _selectedTab,
-                onTabChanged: (index) => setState(() => _selectedTab = index),
-              ),
-              // Main Content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 24,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TopBar(adminName: 'أ/ صبري منير', onLogout: () {}),
-                      const SizedBox(height: 40),
-                      Text(
-                        'مرحباً بك مجدداً 👋',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Cairo',
-                          color: AppColors.primary,
+      child: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          state.maybeWhen(
+            logoutSuccess: () {
+              context.go('/login');
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('تم تسجيل الخروج بنجاح'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            error: (failure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('فشل تسجيل الخروج: ${failure.message}'),
+                  backgroundColor: AppColors.redAccent,
+                ),
+              );
+            },
+            orElse: () {},
+          );
+        },
+        child: Scaffold(
+          body: GradientBackground(
+            child: Row(
+              children: [
+                SideMenu(
+                  selectedIndex: _selectedTab,
+                  onTabChanged: (index) => setState(() => _selectedTab = index),
+                ),
+                // Main Content
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 24,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TopBar(adminName: 'أ/ صبري منير', onLogout: () {}),
+                        const SizedBox(height: 40),
+                        Text(
+                          'مرحباً بك مجدداً 👋',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Cairo',
+                            color: AppColors.primary,
+                          ),
                         ),
-                      ),
-                      const Text(
-                        'إليك ما يحدث في Lowgos اليوم.',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                          fontFamily: 'Cairo',
+                        const Text(
+                          'إليك ما يحدث في Lowgos اليوم.',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontFamily: 'Cairo',
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 32),
-                      // Stats Row
-                      BlocBuilder<DashboardCubit, DashboardState>(
-                        builder: (context, state) {
-                          return state.maybeWhen(
-                            success:
-                                (
-                                  stats,
-                                  users,
-                                  isPaginating,
-                                  failure,
-                                  currentPage,
-                                ) {
-                                  return Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      StatCard(
-                                        title: 'إجمالي المستخدمين',
-                                        count:
-                                            stats.totalUsers?.toString() ??
-                                            '...',
-                                        icon: 'assets/icons/users_icon.svg',
-                                        isSelected: _selectedStat == 0,
-                                        onTap: () =>
-                                            setState(() => _selectedStat = 0),
-                                        badgeText: '12% +',
-                                        badgeColor: Colors.blue,
-                                      ),
-                                      StatCard(
-                                        title: 'الأسئلة والتمارين',
-                                        count:
-                                            stats.totalQuestions?.toString() ??
-                                            '...',
-                                        icon: 'assets/icons/questions_icon.svg',
-                                        isSelected: _selectedStat == 1,
-                                        onTap: () =>
-                                            setState(() => _selectedStat = 1),
-                                        badgeText: 'بدون تغيير',
-                                        badgeColor: Colors.orange,
-                                      ),
-                                      StatCard(
-                                        title: 'المواد القانونية',
-                                        count:
-                                            stats.totalMaterials?.toString() ??
-                                            '...',
-                                        icon: 'assets/icons/laws_icon.svg',
-                                        isSelected: _selectedStat == 2,
-                                        onTap: () =>
-                                            setState(() => _selectedStat = 2),
-                                        badgeText: '5+ اليوم',
-                                        badgeColor: Colors.green,
-                                      ),
-                                      StatCard(
-                                        title: 'إعدادات النظام',
-                                        count: stats.isSystemActive
-                                            ? 'نشطة'
-                                            : 'متوقفة',
-                                        icon: 'assets/icons/settings_icon.svg',
-                                        isSelected: _selectedStat == 3,
-                                        onTap: () =>
-                                            setState(() => _selectedStat = 3),
-                                        highlightColor: stats.isSystemActive
-                                            ? Colors.green
-                                            : Colors.grey,
-                                      ),
-                                    ],
-                                  );
-                                },
-                            orElse: () => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 40),
-                      // Search Bar
-                      DashboardSearchBar(
-                        onSearch: (q) =>
-                            context.read<DashboardCubit>().search(q),
-                      ),
-                      const SizedBox(height: 24),
-                      // Users Table
-                      Expanded(
-                        child: BlocBuilder<DashboardCubit, DashboardState>(
+                        const SizedBox(height: 32),
+                        // Stats Row
+                        BlocBuilder<DashboardCubit, DashboardState>(
                           builder: (context, state) {
                             return state.maybeWhen(
                               success:
@@ -157,35 +101,122 @@ class _DashboardPageState extends State<DashboardPage> {
                                     failure,
                                     currentPage,
                                   ) {
-                                    return Column(
+                                    return Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Expanded(
-                                          child: SingleChildScrollView(
-                                            child: UserTable(users: users),
-                                          ),
+                                        StatCard(
+                                          title: 'إجمالي المستخدمين',
+                                          count:
+                                              stats.totalUsers?.toString() ??
+                                              '...',
+                                          icon: 'assets/icons/users_icon.svg',
+                                          isSelected: _selectedStat == 0,
+                                          onTap: () =>
+                                              setState(() => _selectedStat = 0),
+                                          badgeText: '12% +',
+                                          badgeColor: Colors.blue,
                                         ),
-                                        const SizedBox(height: 16),
-                                        // Pagination
-                                        _buildPagination(currentPage),
+                                        StatCard(
+                                          title: 'الأسئلة والتمارين',
+                                          count:
+                                              stats.totalQuestions
+                                                  ?.toString() ??
+                                              '...',
+                                          icon:
+                                              'assets/icons/questions_icon.svg',
+                                          isSelected: _selectedStat == 1,
+                                          onTap: () =>
+                                              setState(() => _selectedStat = 1),
+                                          badgeText: 'بدون تغيير',
+                                          badgeColor: Colors.orange,
+                                        ),
+                                        StatCard(
+                                          title: 'المواد القانونية',
+                                          count:
+                                              stats.totalMaterials
+                                                  ?.toString() ??
+                                              '...',
+                                          icon: 'assets/icons/laws_icon.svg',
+                                          isSelected: _selectedStat == 2,
+                                          onTap: () =>
+                                              setState(() => _selectedStat = 2),
+                                          badgeText: '5+ اليوم',
+                                          badgeColor: Colors.green,
+                                        ),
+                                        StatCard(
+                                          title: 'إعدادات النظام',
+                                          count: stats.isSystemActive
+                                              ? 'نشطة'
+                                              : 'متوقفة',
+                                          icon:
+                                              'assets/icons/settings_icon.svg',
+                                          isSelected: _selectedStat == 3,
+                                          onTap: () =>
+                                              setState(() => _selectedStat = 3),
+                                          highlightColor: stats.isSystemActive
+                                              ? Colors.green
+                                              : Colors.grey,
+                                        ),
                                       ],
                                     );
                                   },
-                              loading: () => const Center(
+                              orElse: () => const Center(
                                 child: CircularProgressIndicator(),
                               ),
-                              error: (f) => Center(child: Text(f.message)),
-                              orElse: () => const SizedBox.shrink(),
                             );
                           },
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 40),
+                        // Search Bar
+                        DashboardSearchBar(
+                          onSearch: (q) =>
+                              context.read<DashboardCubit>().search(q),
+                        ),
+                        const SizedBox(height: 24),
+                        // Users Table
+                        Expanded(
+                          child: BlocBuilder<DashboardCubit, DashboardState>(
+                            builder: (context, state) {
+                              return state.maybeWhen(
+                                success:
+                                    (
+                                      stats,
+                                      users,
+                                      isPaginating,
+                                      failure,
+                                      currentPage,
+                                    ) {
+                                      return Column(
+                                        children: [
+                                          Expanded(
+                                            child: SingleChildScrollView(
+                                              child: UserTable(users: users),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          // Pagination
+                                          _buildPagination(currentPage),
+                                        ],
+                                      );
+                                    },
+                                loading: () => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                error: (f) => Center(child: Text(f.message)),
+                                orElse: () => const SizedBox.shrink(),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Side Menu (Right side)
-            ],
+                // Side Menu (Right side)
+              ],
+            ),
           ),
         ),
       ),

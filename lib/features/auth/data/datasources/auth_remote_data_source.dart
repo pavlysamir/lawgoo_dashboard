@@ -5,6 +5,7 @@ import '../models/admin_user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AdminUserModel> login(String email, String password);
+  Future<void> logOut();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -42,6 +43,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           }
         } catch (e) {
           throw ServerFailure('An unexpected error occurred: $e');
+        }
+      },
+    );
+  }
+
+  @override
+  Future<void> logOut() async {
+    return FirebaseLogger.logCall(
+      'logOut',
+      call: () async {
+        try {
+          await firebaseAuth.signOut();
+        } catch (e) {
+          throw ServerFailure('Logout failed: $e');
         }
       },
     );

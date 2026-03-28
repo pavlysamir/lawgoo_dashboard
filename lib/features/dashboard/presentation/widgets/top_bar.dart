@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../auth/presentation/bloc/auth_cubit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/utils/app_colors.dart';
+import 'logout_dialog.dart';
 
 class TopBar extends StatelessWidget {
   final String adminName;
@@ -39,7 +42,15 @@ class TopBar extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                onPressed: onLogout,
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (dialogContext) => BlocProvider.value(
+                      value: BlocProvider.of<AuthCubit>(context),
+                      child: const LogoutDialog(),
+                    ),
+                  );
+                },
                 icon: const Icon(
                   Icons.logout,
                   color: Colors.redAccent,

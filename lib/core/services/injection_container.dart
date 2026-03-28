@@ -6,6 +6,7 @@ import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_admin.dart';
+import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
 import '../../features/dashboard/data/datasources/dashboard_remote_data_source.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
@@ -32,8 +33,9 @@ Future<void> initDependencies() async {
   );
 
   getIt.registerLazySingleton(() => LoginAdmin(getIt()));
+  getIt.registerLazySingleton(() => LogOutUseCase(getIt()));
 
-  getIt.registerFactory(() => AuthCubit(loginAdmin: getIt()));
+  getIt.registerFactory(() => AuthCubit(loginAdmin: getIt(), logOutUseCase: getIt()));
 
   // Features - Dashboard
   // Data sources

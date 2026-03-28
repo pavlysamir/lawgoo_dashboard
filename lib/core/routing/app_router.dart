@@ -20,8 +20,11 @@ class AppRouter {
       ),
       GoRoute(
         path: '/dashboard',
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<DashboardCubit>()..init(),
+        builder: (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => getIt<DashboardCubit>()..init()),
+            BlocProvider(create: (_) => getIt<AuthCubit>()),
+          ],
           child: const DashboardPage(),
         ),
       ),
