@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lowgos_dashboard/core/utils/app_colors.dart';
 
 class DashboardSearchBar extends StatelessWidget {
   final Function(String) onSearch;
@@ -10,11 +11,12 @@ class DashboardSearchBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: AppColors.grey200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(5),
+            color: AppColors.black.withAlpha(5),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

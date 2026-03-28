@@ -38,7 +38,7 @@ class StatCard extends StatelessWidget {
               ? (highlightColor ?? AppColors.primary)
               : Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: isSelected ? null : Border.all(color: Colors.grey.shade100),
+          border: isSelected ? null : Border.all(color: AppColors.grey200),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -56,6 +56,23 @@ class StatCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white.withAlpha(30)
+                        : Colors.grey.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: SvgPicture.asset(
+                    icon,
+                    width: 24,
+                    colorFilter: ColorFilter.mode(
+                      isSelected ? Colors.white : Colors.black87,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
                 if (badgeText != null)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -80,23 +97,6 @@ class StatCard extends StatelessWidget {
                   )
                 else
                   const SizedBox.shrink(),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Colors.white.withAlpha(30)
-                        : Colors.grey.shade50,
-                    shape: BoxShape.circle,
-                  ),
-                  child: SvgPicture.asset(
-                    icon,
-                    width: 24,
-                    colorFilter: ColorFilter.mode(
-                      isSelected ? Colors.white : Colors.black87,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
               ],
             ),
             const Spacer(),

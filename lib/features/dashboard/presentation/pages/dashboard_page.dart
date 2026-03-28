@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lowgos_dashboard/core/widgets/gradient_background.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../bloc/dashboard_cubit.dart';
 import '../bloc/dashboard_state.dart';
@@ -25,14 +26,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.gradientTop, AppColors.gradientBottom],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
+        body: GradientBackground(
           child: Row(
             children: [
               SideMenu(

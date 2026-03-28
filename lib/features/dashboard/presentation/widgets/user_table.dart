@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/widgets/custom_cached_image.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../../../core/utils/app_colors.dart';
 
 class UserTable extends StatelessWidget {
   final List<UserEntity> users;
@@ -11,11 +14,11 @@ class UserTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(5),
+            color: AppColors.black.withAlpha(5),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -63,14 +66,11 @@ class UserTable extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundImage: user.profileImage != null
-                                  ? NetworkImage(user.profileImage!)
-                                  : null,
-                              child: user.profileImage == null
-                                  ? const Icon(Icons.person)
-                                  : null,
+                            CustomCachedImage(
+                              imageUrl: user.profileImage,
+                              width: 40,
+                              height: 40,
+                              borderRadius: 20,
                             ),
                             const SizedBox(width: 12),
                             Column(
@@ -87,7 +87,7 @@ class UserTable extends StatelessWidget {
                                   'ID: #USR-${user.id.substring(0, min(user.id.length, 4))}',
                                   style: const TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey,
+                                    color: AppColors.grey500,
                                   ),
                                 ),
                               ],
@@ -137,7 +137,7 @@ class UserTable extends StatelessWidget {
                               style: const TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 13,
-                                color: Colors.grey,
+                                color: AppColors.grey500,
                               ),
                             ),
                           ],
@@ -149,8 +149,9 @@ class UserTable extends StatelessWidget {
                         child: IconButton(
                           onPressed: () {},
                           icon: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.grey,
+                            size: 16,
+                            Icons.delete,
+                            color: AppColors.redAccent,
                           ),
                         ),
                       ),
@@ -179,7 +180,7 @@ class _HeaderCell extends StatelessWidget {
         text,
         textAlign: TextAlign.start,
         style: const TextStyle(
-          color: Colors.grey,
+          color: AppColors.grey500,
           fontFamily: 'Cairo',
           fontSize: 13,
           fontWeight: FontWeight.w600,

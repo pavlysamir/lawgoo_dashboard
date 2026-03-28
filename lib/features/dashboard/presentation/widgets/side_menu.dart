@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lowgos_dashboard/core/assets/app_assets.dart';
 import '../../../../core/utils/app_colors.dart';
-
 
 class SideMenu extends StatelessWidget {
   final int selectedIndex;
@@ -36,10 +36,10 @@ class SideMenu extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           const SizedBox(height: 20),
-          _buildMenuItem(0, 'لوحة القيادة', 'assets/icons/leader_icon.svg'),
-          _buildMenuItem(1, 'المستخدمون', 'assets/icons/users_icon.svg'),
-          _buildMenuItem(2, 'الأسئلة', 'assets/icons/questions_icon.svg'),
-          _buildMenuItem(3, 'القوانين', 'assets/icons/laws_icon.svg'),
+          _buildMenuItem(0, 'لوحة القيادة', AppAssets.leaderIcon),
+          _buildMenuItem(1, 'المستخدمون', AppAssets.usersIcon),
+          _buildMenuItem(2, 'الأسئلة', AppAssets.questionsIcon),
+          _buildMenuItem(3, 'القوانين', AppAssets.lawIcon),
           const Spacer(),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -72,8 +72,17 @@ class SideMenu extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            SvgPicture.asset(
+              icon,
+              colorFilter: ColorFilter.mode(
+                isSelected ? Colors.white : Colors.black54,
+                BlendMode.srcIn,
+              ),
+              width: 24,
+            ),
+            const SizedBox(width: 12),
             Text(
               title,
               style: TextStyle(
@@ -82,15 +91,6 @@ class SideMenu extends StatelessWidget {
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontFamily: 'Cairo',
               ),
-            ),
-            const SizedBox(width: 12),
-            SvgPicture.asset(
-              icon,
-              colorFilter: ColorFilter.mode(
-                isSelected ? Colors.white : Colors.black54,
-                BlendMode.srcIn,
-              ),
-              width: 24,
             ),
           ],
         ),
