@@ -10,4 +10,5 @@ abstract class DashboardRepository {
     UserEntity? lastUser,
   });
   Future<Either<Failure, List<UserEntity>>> searchUsers(String query);
+  Future<Either<Failure, Unit>> deleteUser(String userId);
 }

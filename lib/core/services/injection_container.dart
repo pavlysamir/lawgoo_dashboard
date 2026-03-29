@@ -14,6 +14,7 @@ import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
 import '../../features/dashboard/domain/usecases/get_dashboard_stats.dart';
 import '../../features/dashboard/domain/usecases/get_users.dart';
 import '../../features/dashboard/domain/usecases/search_users.dart';
+import '../../features/dashboard/domain/usecases/delete_user.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_cubit.dart';
 import '../../features/users/presentation/bloc/users_cubit.dart';
 
@@ -53,6 +54,7 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => GetDashboardStats(getIt()));
   getIt.registerLazySingleton(() => GetUsers(getIt()));
   getIt.registerLazySingleton(() => SearchUsers(getIt()));
+  getIt.registerLazySingleton(() => DeleteUser(getIt()));
 
   // Bloc
   getIt.registerFactory(
@@ -60,6 +62,7 @@ Future<void> initDependencies() async {
       getDashboardStats: getIt(),
       getUsers: getIt(),
       searchUsers: getIt(),
+      deleteUser: getIt(),
     ),
   );
 
@@ -67,6 +70,7 @@ Future<void> initDependencies() async {
     () => UsersCubit(
       getUsers: getIt(),
       searchUsers: getIt(),
+      deleteUser: getIt(),
     ),
   );
 }

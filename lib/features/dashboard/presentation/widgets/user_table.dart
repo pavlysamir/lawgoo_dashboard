@@ -3,12 +3,19 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/custom_cached_image.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../../../core/utils/app_colors.dart';
+import 'delete_user_dialog.dart';
 
 class UserTable extends StatelessWidget {
   final List<UserEntity> users;
   final bool isLoading;
+  final Function(UserEntity)? onDelete;
 
-  const UserTable({super.key, required this.users, this.isLoading = false});
+  const UserTable({
+    super.key,
+    required this.users,
+    this.isLoading = false,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +154,18 @@ class UserTable extends StatelessWidget {
                       Expanded(
                         flex: 1,
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            if (onDelete != null) {
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (context) => DeleteUserDialog(
+                                      user: user,
+                                      onConfirm: () => onDelete!(user),
+                                    ),
+                              );
+                            }
+                          },
                           icon: const Icon(
                             size: 16,
                             Icons.delete,

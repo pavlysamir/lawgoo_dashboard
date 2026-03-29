@@ -8,6 +8,7 @@ abstract class DashboardRemoteDataSource {
   Future<DashboardStatsModel> getDashboardStats();
   Future<List<UserModel>> getUsers({int limit = 4, String? lastUserId});
   Future<List<UserModel>> searchUsers(String query);
+  Future<void> deleteUser(String userId);
 }
 
 class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
@@ -104,6 +105,17 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
             doc.id,
           );
         }).toList();
+      },
+    );
+  }
+
+  @override
+  Future<void> deleteUser(String userId) async {
+    return FirebaseLogger.logCall(
+      'deleteUser',
+      params: {'userId': userId},
+      call: () async {
+        await firestore.collection(FirebaseCollections.users).doc(userId).delete();
       },
     );
   }

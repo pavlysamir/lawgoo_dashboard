@@ -51,6 +51,10 @@ class UsersPage extends StatelessWidget {
                           child: UserTable(
                             users: users,
                             isLoading: isSearching,
+                            onDelete:
+                                (user) => context
+                                    .read<UsersCubit>()
+                                    .deleteUser(user.id),
                           ),
                         ),
                       ),

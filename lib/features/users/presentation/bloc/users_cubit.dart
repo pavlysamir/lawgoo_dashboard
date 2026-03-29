@@ -2,11 +2,13 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../dashboard/domain/usecases/get_users.dart';
 import '../../../dashboard/domain/usecases/search_users.dart';
+import '../../../dashboard/domain/usecases/delete_user.dart';
 import 'users_state.dart';
 
 class UsersCubit extends Cubit<UsersState> {
   final GetUsers getUsers;
   final SearchUsers searchUsers;
+  final DeleteUser _deleteUser;
 
   Timer? _searchTimer;
   static const int _limit = 10;
@@ -14,7 +16,9 @@ class UsersCubit extends Cubit<UsersState> {
   UsersCubit({
     required this.getUsers,
     required this.searchUsers,
-  }) : super(const UsersState.initial());
+    required DeleteUser deleteUser,
+  }) : _deleteUser = deleteUser,
+       super(const UsersState.initial());
 
   Future<void> init() async {
     emit(const UsersState.loading());
@@ -85,6 +89,24 @@ class UsersCubit extends Cubit<UsersState> {
         },
       );
     });
+  }
+
+  Future<void> deleteUser(String userId) async {
+    await state.maybeMap(
+      success: (successState) async {
+        final result = await _deleteUser(userId);
+
+        result.fold(
+          (failure) => emit(UsersState.error(failure)),
+          (_) {
+            final updatedUsers =
+                successState.users.where((u) => u.id != userId).toList();
+            emit(successState.copyWith(users: updatedUsers));
+          },
+        );
+      },
+      orElse: () async {},
+    );
   }
 
   Future<void> _resetSearch() async {

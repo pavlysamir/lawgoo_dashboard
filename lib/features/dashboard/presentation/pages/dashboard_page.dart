@@ -195,7 +195,12 @@ class _DashboardPageState extends State<DashboardPage> {
                       children: [
                         Expanded(
                           child: SingleChildScrollView(
-                            child: UserTable(users: users),
+                            child: UserTable(
+                              users: users,
+                              onDelete: (user) => context
+                                  .read<DashboardCubit>()
+                                  .deleteUser(user.id),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),

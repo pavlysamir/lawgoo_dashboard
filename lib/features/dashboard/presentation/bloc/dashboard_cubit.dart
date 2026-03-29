@@ -3,12 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/get_dashboard_stats.dart';
 import '../../domain/usecases/get_users.dart';
 import '../../domain/usecases/search_users.dart';
+import '../../domain/usecases/delete_user.dart';
 import 'dashboard_state.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
   final GetDashboardStats getDashboardStats;
   final GetUsers getUsers;
   final SearchUsers searchUsers;
+  final DeleteUser _deleteUser;
 
   Timer? _searchTimer;
 
@@ -16,7 +18,9 @@ class DashboardCubit extends Cubit<DashboardState> {
     required this.getDashboardStats,
     required this.getUsers,
     required this.searchUsers,
-  }) : super(const DashboardState.initial());
+    required DeleteUser deleteUser,
+  }) : _deleteUser = deleteUser,
+       super(const DashboardState.initial());
 
   Future<void> init() async {
     emit(const DashboardState.loading());
@@ -84,6 +88,27 @@ class DashboardCubit extends Cubit<DashboardState> {
         orElse: () {},
       );
     });
+  }
+
+  Future<void> deleteUser(String userId) async {
+    await state.maybeMap(
+      success: (successState) async {
+        final result = await _deleteUser(userId);
+
+        result.fold(
+          (failure) => emit(DashboardState.error(failure)),
+          (_) {
+            // Remove user from list and refresh stats
+            final updatedUsers =
+                successState.users.where((u) => u.id != userId).toList();
+            emit(successState.copyWith(users: updatedUsers));
+            // Reload stats to reflect the change
+            init();
+          },
+        );
+      },
+      orElse: () async {},
+    );
   }
 
   Future<void> _resetSearch() async {
