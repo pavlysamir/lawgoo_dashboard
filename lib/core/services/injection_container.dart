@@ -16,6 +16,13 @@ import '../../features/dashboard/domain/usecases/get_users.dart';
 import '../../features/dashboard/domain/usecases/search_users.dart';
 import '../../features/dashboard/domain/usecases/delete_user.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_cubit.dart';
+import '../../features/laws/data/datasources/laws_remote_data_source.dart';
+import '../../features/laws/data/repositories/laws_repository_impl.dart';
+import '../../features/laws/domain/repositories/laws_repository.dart';
+import '../../features/laws/domain/usecases/get_laws_use_case.dart';
+import '../../features/laws/domain/usecases/get_laws_count_use_case.dart';
+import '../../features/laws/domain/usecases/add_law_use_case.dart';
+import '../../features/laws/presentation/bloc/laws_cubit.dart';
 import '../../features/users/presentation/bloc/users_cubit.dart';
 
 final getIt = GetIt.instance;
@@ -71,6 +78,31 @@ Future<void> initDependencies() async {
       getUsers: getIt(),
       searchUsers: getIt(),
       deleteUser: getIt(),
+    ),
+  );
+
+  // Features - Laws
+  // Data sources
+  getIt.registerLazySingleton<LawsRemoteDataSource>(
+    () => LawsRemoteDataSourceImpl(firestore: getIt()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<LawsRepository>(
+    () => LawsRepositoryImpl(remoteDataSource: getIt()),
+  );
+
+  // Use cases
+  getIt.registerLazySingleton(() => GetLawsUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetLawsCountUseCase(getIt()));
+  getIt.registerLazySingleton(() => AddLawUseCase(getIt()));
+
+  // Bloc
+  getIt.registerFactory(
+    () => LawsCubit(
+      getLaws: getIt(),
+      getLawsCount: getIt(),
+      addLaw: getIt(),
     ),
   );
 }

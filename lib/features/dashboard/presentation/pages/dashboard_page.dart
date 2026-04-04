@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lowgos_dashboard/core/services/injection_container.dart';
 import 'package:lowgos_dashboard/core/widgets/gradient_background.dart';
+import 'package:lowgos_dashboard/features/laws/presentation/bloc/laws_cubit.dart';
+import 'package:lowgos_dashboard/features/laws/presentation/pages/laws_page.dart';
 import 'package:lowgos_dashboard/features/users/presentation/bloc/users_cubit.dart';
 import 'package:lowgos_dashboard/features/users/presentation/pages/users_page.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
@@ -81,6 +83,13 @@ class _DashboardPageState extends State<DashboardPage> {
                             child: BlocProvider(
                               create: (context) => getIt<UsersCubit>()..init(),
                               child: const UsersPage(),
+                            ),
+                          )
+                        else if (_selectedTab == 3)
+                          Expanded(
+                            child: BlocProvider(
+                              create: (context) => getIt<LawsCubit>()..init(),
+                              child: const LawsPage(),
                             ),
                           )
                         else
