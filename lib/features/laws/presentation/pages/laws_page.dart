@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_text_styles.dart';
+import '../../domain/entities/law_entity.dart';
 import '../bloc/laws_cubit.dart';
 import '../bloc/laws_state.dart';
 import '../widgets/law_card.dart';
 import '../widgets/add_law_section.dart';
+import '../widgets/delete_law_dialog.dart';
 
 class LawsPage extends StatelessWidget {
-  const LawsPage({super.key});
+  final Function(LawEntity) onAddMaterials;
+
+  const LawsPage({super.key, required this.onAddMaterials});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +24,14 @@ class LawsPage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(s.addLawFailure!.message),
+                  backgroundColor: AppColors.redAccent,
+                ),
+              );
+            }
+            if (s.deleteLawFailure != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(s.deleteLawFailure!.message),
                   backgroundColor: AppColors.redAccent,
                 ),
               );
@@ -122,8 +134,19 @@ class LawsPage extends StatelessWidget {
                   return LawCard(
                     law: law,
                     accentColor: color,
-                    onDelete: () {},
-                    onAddMaterials: () {},
+                    onDelete: () {
+                      final lawsCubit = context.read<LawsCubit>();
+                      showDialog(
+                        context: context,
+                        builder: (context) => DeleteLawDialog(
+                          law: law,
+                          onConfirm: () {
+                            lawsCubit.deleteLawById(law.id);
+                          },
+                        ),
+                      );
+                    },
+                    onAddMaterials: () => onAddMaterials(law),
                   );
                 },
               ),

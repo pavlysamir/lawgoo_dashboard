@@ -128,12 +128,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<LawEntity> laws,  int totalLaws,  int activeLaws,  bool isPaginating,  bool showAddForm,  bool isAddingLaw,  Failure? paginationFailure,  Failure? addLawFailure)?  success,TResult Function( Failure failure)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<LawEntity> laws,  int totalLaws,  int activeLaws,  bool isPaginating,  bool showAddForm,  bool isAddingLaw,  bool isDeletingLaw,  Failure? paginationFailure,  Failure? addLawFailure,  Failure? deleteLawFailure)?  success,TResult Function( Failure failure)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
-return success(_that.laws,_that.totalLaws,_that.activeLaws,_that.isPaginating,_that.showAddForm,_that.isAddingLaw,_that.paginationFailure,_that.addLawFailure);case _Error() when error != null:
+return success(_that.laws,_that.totalLaws,_that.activeLaws,_that.isPaginating,_that.showAddForm,_that.isAddingLaw,_that.isDeletingLaw,_that.paginationFailure,_that.addLawFailure,_that.deleteLawFailure);case _Error() when error != null:
 return error(_that.failure);case _:
   return orElse();
 
@@ -152,12 +152,12 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<LawEntity> laws,  int totalLaws,  int activeLaws,  bool isPaginating,  bool showAddForm,  bool isAddingLaw,  Failure? paginationFailure,  Failure? addLawFailure)  success,required TResult Function( Failure failure)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<LawEntity> laws,  int totalLaws,  int activeLaws,  bool isPaginating,  bool showAddForm,  bool isAddingLaw,  bool isDeletingLaw,  Failure? paginationFailure,  Failure? addLawFailure,  Failure? deleteLawFailure)  success,required TResult Function( Failure failure)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Success():
-return success(_that.laws,_that.totalLaws,_that.activeLaws,_that.isPaginating,_that.showAddForm,_that.isAddingLaw,_that.paginationFailure,_that.addLawFailure);case _Error():
+return success(_that.laws,_that.totalLaws,_that.activeLaws,_that.isPaginating,_that.showAddForm,_that.isAddingLaw,_that.isDeletingLaw,_that.paginationFailure,_that.addLawFailure,_that.deleteLawFailure);case _Error():
 return error(_that.failure);case _:
   throw StateError('Unexpected subclass');
 
@@ -175,12 +175,12 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<LawEntity> laws,  int totalLaws,  int activeLaws,  bool isPaginating,  bool showAddForm,  bool isAddingLaw,  Failure? paginationFailure,  Failure? addLawFailure)?  success,TResult? Function( Failure failure)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<LawEntity> laws,  int totalLaws,  int activeLaws,  bool isPaginating,  bool showAddForm,  bool isAddingLaw,  bool isDeletingLaw,  Failure? paginationFailure,  Failure? addLawFailure,  Failure? deleteLawFailure)?  success,TResult? Function( Failure failure)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
-return success(_that.laws,_that.totalLaws,_that.activeLaws,_that.isPaginating,_that.showAddForm,_that.isAddingLaw,_that.paginationFailure,_that.addLawFailure);case _Error() when error != null:
+return success(_that.laws,_that.totalLaws,_that.activeLaws,_that.isPaginating,_that.showAddForm,_that.isAddingLaw,_that.isDeletingLaw,_that.paginationFailure,_that.addLawFailure,_that.deleteLawFailure);case _Error() when error != null:
 return error(_that.failure);case _:
   return null;
 
@@ -257,7 +257,7 @@ String toString() {
 
 
 class _Success implements LawsState {
-  const _Success({required final  List<LawEntity> laws, required this.totalLaws, required this.activeLaws, this.isPaginating = false, this.showAddForm = false, this.isAddingLaw = false, this.paginationFailure, this.addLawFailure}): _laws = laws;
+  const _Success({required final  List<LawEntity> laws, required this.totalLaws, required this.activeLaws, this.isPaginating = false, this.showAddForm = false, this.isAddingLaw = false, this.isDeletingLaw = false, this.paginationFailure, this.addLawFailure, this.deleteLawFailure}): _laws = laws;
   
 
  final  List<LawEntity> _laws;
@@ -272,8 +272,10 @@ class _Success implements LawsState {
 @JsonKey() final  bool isPaginating;
 @JsonKey() final  bool showAddForm;
 @JsonKey() final  bool isAddingLaw;
+@JsonKey() final  bool isDeletingLaw;
  final  Failure? paginationFailure;
  final  Failure? addLawFailure;
+ final  Failure? deleteLawFailure;
 
 /// Create a copy of LawsState
 /// with the given fields replaced by the non-null parameter values.
@@ -285,16 +287,16 @@ _$SuccessCopyWith<_Success> get copyWith => __$SuccessCopyWithImpl<_Success>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&const DeepCollectionEquality().equals(other._laws, _laws)&&(identical(other.totalLaws, totalLaws) || other.totalLaws == totalLaws)&&(identical(other.activeLaws, activeLaws) || other.activeLaws == activeLaws)&&(identical(other.isPaginating, isPaginating) || other.isPaginating == isPaginating)&&(identical(other.showAddForm, showAddForm) || other.showAddForm == showAddForm)&&(identical(other.isAddingLaw, isAddingLaw) || other.isAddingLaw == isAddingLaw)&&(identical(other.paginationFailure, paginationFailure) || other.paginationFailure == paginationFailure)&&(identical(other.addLawFailure, addLawFailure) || other.addLawFailure == addLawFailure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&const DeepCollectionEquality().equals(other._laws, _laws)&&(identical(other.totalLaws, totalLaws) || other.totalLaws == totalLaws)&&(identical(other.activeLaws, activeLaws) || other.activeLaws == activeLaws)&&(identical(other.isPaginating, isPaginating) || other.isPaginating == isPaginating)&&(identical(other.showAddForm, showAddForm) || other.showAddForm == showAddForm)&&(identical(other.isAddingLaw, isAddingLaw) || other.isAddingLaw == isAddingLaw)&&(identical(other.isDeletingLaw, isDeletingLaw) || other.isDeletingLaw == isDeletingLaw)&&(identical(other.paginationFailure, paginationFailure) || other.paginationFailure == paginationFailure)&&(identical(other.addLawFailure, addLawFailure) || other.addLawFailure == addLawFailure)&&(identical(other.deleteLawFailure, deleteLawFailure) || other.deleteLawFailure == deleteLawFailure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_laws),totalLaws,activeLaws,isPaginating,showAddForm,isAddingLaw,paginationFailure,addLawFailure);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_laws),totalLaws,activeLaws,isPaginating,showAddForm,isAddingLaw,isDeletingLaw,paginationFailure,addLawFailure,deleteLawFailure);
 
 @override
 String toString() {
-  return 'LawsState.success(laws: $laws, totalLaws: $totalLaws, activeLaws: $activeLaws, isPaginating: $isPaginating, showAddForm: $showAddForm, isAddingLaw: $isAddingLaw, paginationFailure: $paginationFailure, addLawFailure: $addLawFailure)';
+  return 'LawsState.success(laws: $laws, totalLaws: $totalLaws, activeLaws: $activeLaws, isPaginating: $isPaginating, showAddForm: $showAddForm, isAddingLaw: $isAddingLaw, isDeletingLaw: $isDeletingLaw, paginationFailure: $paginationFailure, addLawFailure: $addLawFailure, deleteLawFailure: $deleteLawFailure)';
 }
 
 
@@ -305,7 +307,7 @@ abstract mixin class _$SuccessCopyWith<$Res> implements $LawsStateCopyWith<$Res>
   factory _$SuccessCopyWith(_Success value, $Res Function(_Success) _then) = __$SuccessCopyWithImpl;
 @useResult
 $Res call({
- List<LawEntity> laws, int totalLaws, int activeLaws, bool isPaginating, bool showAddForm, bool isAddingLaw, Failure? paginationFailure, Failure? addLawFailure
+ List<LawEntity> laws, int totalLaws, int activeLaws, bool isPaginating, bool showAddForm, bool isAddingLaw, bool isDeletingLaw, Failure? paginationFailure, Failure? addLawFailure, Failure? deleteLawFailure
 });
 
 
@@ -322,7 +324,7 @@ class __$SuccessCopyWithImpl<$Res>
 
 /// Create a copy of LawsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? laws = null,Object? totalLaws = null,Object? activeLaws = null,Object? isPaginating = null,Object? showAddForm = null,Object? isAddingLaw = null,Object? paginationFailure = freezed,Object? addLawFailure = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? laws = null,Object? totalLaws = null,Object? activeLaws = null,Object? isPaginating = null,Object? showAddForm = null,Object? isAddingLaw = null,Object? isDeletingLaw = null,Object? paginationFailure = freezed,Object? addLawFailure = freezed,Object? deleteLawFailure = freezed,}) {
   return _then(_Success(
 laws: null == laws ? _self._laws : laws // ignore: cast_nullable_to_non_nullable
 as List<LawEntity>,totalLaws: null == totalLaws ? _self.totalLaws : totalLaws // ignore: cast_nullable_to_non_nullable
@@ -330,8 +332,10 @@ as int,activeLaws: null == activeLaws ? _self.activeLaws : activeLaws // ignore:
 as int,isPaginating: null == isPaginating ? _self.isPaginating : isPaginating // ignore: cast_nullable_to_non_nullable
 as bool,showAddForm: null == showAddForm ? _self.showAddForm : showAddForm // ignore: cast_nullable_to_non_nullable
 as bool,isAddingLaw: null == isAddingLaw ? _self.isAddingLaw : isAddingLaw // ignore: cast_nullable_to_non_nullable
+as bool,isDeletingLaw: null == isDeletingLaw ? _self.isDeletingLaw : isDeletingLaw // ignore: cast_nullable_to_non_nullable
 as bool,paginationFailure: freezed == paginationFailure ? _self.paginationFailure : paginationFailure // ignore: cast_nullable_to_non_nullable
 as Failure?,addLawFailure: freezed == addLawFailure ? _self.addLawFailure : addLawFailure // ignore: cast_nullable_to_non_nullable
+as Failure?,deleteLawFailure: freezed == deleteLawFailure ? _self.deleteLawFailure : deleteLawFailure // ignore: cast_nullable_to_non_nullable
 as Failure?,
   ));
 }

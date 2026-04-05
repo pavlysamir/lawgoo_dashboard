@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lowgos_dashboard/core/services/injection_container.dart';
 import 'package:lowgos_dashboard/core/widgets/gradient_background.dart';
+import 'package:lowgos_dashboard/features/laws/domain/entities/law_entity.dart';
 import 'package:lowgos_dashboard/features/laws/presentation/bloc/laws_cubit.dart';
+import 'package:lowgos_dashboard/features/laws/presentation/pages/law_materials_page.dart';
 import 'package:lowgos_dashboard/features/laws/presentation/pages/laws_page.dart';
 import 'package:lowgos_dashboard/features/users/presentation/bloc/users_cubit.dart';
 import 'package:lowgos_dashboard/features/users/presentation/pages/users_page.dart';
@@ -28,6 +30,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedTab = 0;
   int _selectedStat = 0;
+  LawEntity? _selectedLawForMaterials;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +65,10 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 SideMenu(
                   selectedIndex: _selectedTab,
-                  onTabChanged: (index) => setState(() => _selectedTab = index),
+                  onTabChanged: (index) => setState(() {
+                    _selectedTab = index;
+                    _selectedLawForMaterials = null; // Reset sub-page when tab changes
+                  }),
                 ),
                 // Main Content
                 Expanded(
@@ -87,10 +93,19 @@ class _DashboardPageState extends State<DashboardPage> {
                           )
                         else if (_selectedTab == 3)
                           Expanded(
-                            child: BlocProvider(
-                              create: (context) => getIt<LawsCubit>()..init(),
-                              child: const LawsPage(),
-                            ),
+                            child: _selectedLawForMaterials == null
+                                ? BlocProvider(
+                                    create: (context) => getIt<LawsCubit>()..init(),
+                                    child: LawsPage(
+                                      onAddMaterials: (law) {
+                                        setState(() => _selectedLawForMaterials = law);
+                                      },
+                                    ),
+                                  )
+                                : LawMaterialsPage(
+                                    law: _selectedLawForMaterials!,
+                                    onBack: () => setState(() => _selectedLawForMaterials = null),
+                                  ),
                           )
                         else
                           const Expanded(

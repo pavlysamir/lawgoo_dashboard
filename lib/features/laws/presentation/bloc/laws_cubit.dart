@@ -3,17 +3,20 @@ import '../../domain/entities/law_entity.dart';
 import '../../domain/usecases/get_laws_use_case.dart';
 import '../../domain/usecases/add_law_use_case.dart';
 import '../../domain/usecases/get_laws_count_use_case.dart';
+import '../../domain/usecases/delete_law_use_case.dart';
 import 'laws_state.dart';
 
 class LawsCubit extends Cubit<LawsState> {
   final GetLawsUseCase getLaws;
   final AddLawUseCase addLaw;
   final GetLawsCountUseCase getLawsCount;
+  final DeleteLawUseCase deleteLaw;
 
   LawsCubit({
     required this.getLaws,
     required this.addLaw,
     required this.getLawsCount,
+    required this.deleteLaw,
   }) : super(const LawsState.initial());
 
   Future<void> init() async {
@@ -100,7 +103,7 @@ class LawsCubit extends Cubit<LawsState> {
           completionPercentage: 0,
           materialsCount: 0,
           createdAt: DateTime.now(),
-          isActive: true,
+          isActive: false,
         );
 
         final result = await addLaw(newLaw);
@@ -112,6 +115,30 @@ class LawsCubit extends Cubit<LawsState> {
           (_) {
             // After successful addition, we can either refresh or manually update state
             // Refreshing is safer
+            init();
+          },
+        );
+      },
+      orElse: () async {},
+    );
+  }
+
+  Future<void> deleteLawById(String id) async {
+    await state.maybeMap(
+      success: (successState) async {
+        emit(successState.copyWith(isDeletingLaw: true, deleteLawFailure: null));
+
+        final result = await deleteLaw(id);
+
+        result.fold(
+          (failure) => emit(
+            successState.copyWith(
+              isDeletingLaw: false,
+              deleteLawFailure: failure,
+            ),
+          ),
+          (_) {
+            // Refresh list after deletion
             init();
           },
         );

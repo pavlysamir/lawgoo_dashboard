@@ -1,6 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:lowgos_dashboard/features/laws/domain/usecases/delete_law_use_case.dart';
+import '../../features/laws/data/datasources/law_material_remote_datasource.dart';
+import '../../features/laws/data/repositories/law_material_repository_impl.dart';
+import '../../features/laws/domain/repositories/law_material_repository.dart';
+import '../../features/laws/domain/usecases/add_law_material_use_case.dart';
+import '../../features/laws/domain/usecases/delete_law_material_use_case.dart';
+import '../../features/laws/domain/usecases/get_law_materials_count_use_case.dart';
+import '../../features/laws/domain/usecases/get_law_materials_use_case.dart';
+import '../../features/laws/domain/usecases/update_law_material_use_case.dart';
 
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -23,6 +32,7 @@ import '../../features/laws/domain/usecases/get_laws_use_case.dart';
 import '../../features/laws/domain/usecases/get_laws_count_use_case.dart';
 import '../../features/laws/domain/usecases/add_law_use_case.dart';
 import '../../features/laws/presentation/bloc/laws_cubit.dart';
+import '../../features/laws/presentation/bloc/law_materials_cubit.dart';
 import '../../features/users/presentation/bloc/users_cubit.dart';
 
 final getIt = GetIt.instance;
@@ -96,6 +106,7 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => GetLawsUseCase(getIt()));
   getIt.registerLazySingleton(() => GetLawsCountUseCase(getIt()));
   getIt.registerLazySingleton(() => AddLawUseCase(getIt()));
+  getIt.registerLazySingleton(() => DeleteLawUseCase(getIt()));
 
   // Bloc
   getIt.registerFactory(
@@ -103,6 +114,36 @@ Future<void> initDependencies() async {
       getLaws: getIt(),
       getLawsCount: getIt(),
       addLaw: getIt(),
+      deleteLaw: getIt(),
+    ),
+  );
+
+  // Features - Law Materials
+  // Data sources
+  getIt.registerLazySingleton<LawMaterialRemoteDataSource>(
+    () => LawMaterialRemoteDataSourceImpl(firestore: getIt()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<LawMaterialRepository>(
+    () => LawMaterialRepositoryImpl(remoteDataSource: getIt()),
+  );
+
+  // Use cases
+  getIt.registerLazySingleton(() => AddLawMaterialUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetLawMaterialsUseCase(getIt()));
+  getIt.registerLazySingleton(() => DeleteLawMaterialUseCase(getIt()));
+  getIt.registerLazySingleton(() => UpdateLawMaterialUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetLawMaterialsCountUseCase(getIt()));
+
+  // Bloc
+  getIt.registerFactory(
+    () => LawMaterialsCubit(
+      addLawMaterial: getIt(),
+      getLawMaterials: getIt(),
+      deleteLawMaterial: getIt(),
+      updateLawMaterial: getIt(),
+      getLawMaterialsCount: getIt(),
     ),
   );
 }

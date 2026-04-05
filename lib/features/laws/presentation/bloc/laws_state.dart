@@ -15,8 +15,10 @@ class LawsState with _$LawsState {
     @Default(false) bool isPaginating,
     @Default(false) bool showAddForm,
     @Default(false) bool isAddingLaw,
+    @Default(false) bool isDeletingLaw,
     Failure? paginationFailure,
     Failure? addLawFailure,
+    Failure? deleteLawFailure,
   }) = _Success;
   const factory LawsState.error(Failure failure) = _Error;
 }

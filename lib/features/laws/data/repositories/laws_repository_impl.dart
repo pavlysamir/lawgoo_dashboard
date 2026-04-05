@@ -64,4 +64,16 @@ class LawsRepositoryImpl implements LawsRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> deleteLaw(String lawId) async {
+    try {
+      await remoteDataSource.deleteLaw(lawId);
+      return const Right(unit);
+    } on FirebaseException catch (e) {
+      return Left(ServerFailure(e.message ?? 'Server error occurred'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

@@ -7,6 +7,7 @@ abstract class LawsRemoteDataSource {
   Future<int> getLawsCount();
   Future<int> getActiveLawsCount();
   Future<void> addLaw(LawModel law);
+  Future<void> deleteLaw(String lawId);
 }
 
 class LawsRemoteDataSourceImpl implements LawsRemoteDataSource {
@@ -27,7 +28,10 @@ class LawsRemoteDataSourceImpl implements LawsRemoteDataSource {
             .limit(limit);
 
         if (lastLaw != null && lastLaw.id.isNotEmpty) {
-          final lastDoc = await firestore.collection('laws').doc(lastLaw.id).get();
+          final lastDoc = await firestore
+              .collection('laws')
+              .doc(lastLaw.id)
+              .get();
           if (lastDoc.exists) {
             query = query.startAfterDocument(lastDoc);
           }
@@ -35,8 +39,10 @@ class LawsRemoteDataSourceImpl implements LawsRemoteDataSource {
 
         final snapshot = await query.get();
         return snapshot.docs
-            .map((doc) =>
-                LawModel.fromJson(doc.data() as Map<String, dynamic>, doc.id))
+            .map(
+              (doc) =>
+                  LawModel.fromJson(doc.data() as Map<String, dynamic>, doc.id),
+            )
             .toList();
       },
     );
@@ -86,6 +92,20 @@ class LawsRemoteDataSourceImpl implements LawsRemoteDataSource {
           'is_deleted': false,
           'updated_at': FieldValue.serverTimestamp(),
           'created_at': FieldValue.serverTimestamp(),
+        });
+      },
+    );
+  }
+
+  @override
+  Future<void> deleteLaw(String lawId) async {
+    return FirebaseLogger.logCall(
+      'deleteLaw',
+      params: {'id': lawId},
+      call: () async {
+        await firestore.collection('laws').doc(lawId).update({
+          'is_deleted': true,
+          'updated_at': FieldValue.serverTimestamp(),
         });
       },
     );
