@@ -11,4 +11,5 @@ abstract class LawsRepository {
   Future<Either<Failure, int>> getActiveLawsCount();
   Future<Either<Failure, Unit>> addLaw(LawEntity law);
   Future<Either<Failure, Unit>> deleteLaw(String lawId);
+  Future<Either<Failure, Unit>> toggleLawActive(String id, bool isActive);
 }

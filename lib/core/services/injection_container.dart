@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:lowgos_dashboard/features/laws/domain/usecases/delete_law_use_case.dart';
+import 'package:lowgos_dashboard/features/laws/domain/usecases/toggle_law_active_use_case.dart';
+import 'package:lowgos_dashboard/features/questions_management/presentation/bloc/questions_management_cubit.dart';
 import '../../features/laws/data/datasources/law_material_remote_datasource.dart';
 import '../../features/laws/data/repositories/law_material_repository_impl.dart';
 import '../../features/laws/domain/repositories/law_material_repository.dart';
@@ -107,6 +109,7 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => GetLawsCountUseCase(getIt()));
   getIt.registerLazySingleton(() => AddLawUseCase(getIt()));
   getIt.registerLazySingleton(() => DeleteLawUseCase(getIt()));
+  getIt.registerLazySingleton(() => ToggleLawActiveUseCase(getIt()));
 
   // Bloc
   getIt.registerFactory(
@@ -115,6 +118,14 @@ Future<void> initDependencies() async {
       getLawsCount: getIt(),
       addLaw: getIt(),
       deleteLaw: getIt(),
+    ),
+  );
+
+  getIt.registerFactory(
+    () => QuestionsManagementCubit(
+      getLaws: getIt(),
+      getLawsCount: getIt(),
+      toggleLawActive: getIt(),
     ),
   );
 

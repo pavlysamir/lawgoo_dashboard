@@ -8,6 +8,7 @@ abstract class LawsRemoteDataSource {
   Future<int> getActiveLawsCount();
   Future<void> addLaw(LawModel law);
   Future<void> deleteLaw(String lawId);
+  Future<void> toggleLawActive(String id, bool isActive);
 }
 
 class LawsRemoteDataSourceImpl implements LawsRemoteDataSource {
@@ -105,6 +106,19 @@ class LawsRemoteDataSourceImpl implements LawsRemoteDataSource {
       call: () async {
         await firestore.collection('laws').doc(lawId).update({
           'is_deleted': true,
+          'updated_at': FieldValue.serverTimestamp(),
+        });
+      },
+    );
+  }
+  @override
+  Future<void> toggleLawActive(String id, bool isActive) async {
+    return FirebaseLogger.logCall(
+      'toggleLawActive',
+      params: {'id': id, 'is_active': isActive},
+      call: () async {
+        await firestore.collection('laws').doc(id).update({
+          'is_active': isActive,
           'updated_at': FieldValue.serverTimestamp(),
         });
       },

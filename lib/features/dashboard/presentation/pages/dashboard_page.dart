@@ -9,6 +9,9 @@ import 'package:lowgos_dashboard/features/laws/presentation/pages/law_materials_
 import 'package:lowgos_dashboard/features/laws/presentation/pages/laws_page.dart';
 import 'package:lowgos_dashboard/features/users/presentation/bloc/users_cubit.dart';
 import 'package:lowgos_dashboard/features/users/presentation/pages/users_page.dart';
+import 'package:lowgos_dashboard/features/questions_management/presentation/bloc/questions_management_cubit.dart';
+import 'package:lowgos_dashboard/features/questions_management/presentation/pages/questions_management_page.dart';
+import 'package:lowgos_dashboard/features/questions_management/presentation/pages/add_questions_page.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../../core/utils/app_colors.dart';
@@ -31,6 +34,8 @@ class _DashboardPageState extends State<DashboardPage> {
   int _selectedTab = 0;
   int _selectedStat = 0;
   LawEntity? _selectedLawForMaterials;
+  LawEntity? _selectedLawForQuestions;
+  bool _isAddingQuestions = false;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +72,9 @@ class _DashboardPageState extends State<DashboardPage> {
                   selectedIndex: _selectedTab,
                   onTabChanged: (index) => setState(() {
                     _selectedTab = index;
-                    _selectedLawForMaterials = null; // Reset sub-page when tab changes
+                    _selectedLawForMaterials = null;
+                    _selectedLawForQuestions = null;
+                    _isAddingQuestions = false;
                   }),
                 ),
                 // Main Content
@@ -90,6 +97,26 @@ class _DashboardPageState extends State<DashboardPage> {
                               create: (context) => getIt<UsersCubit>()..init(),
                               child: const UsersPage(),
                             ),
+                          )
+                        else if (_selectedTab == 2)
+                          Expanded(
+                            child: _isAddingQuestions && _selectedLawForQuestions != null
+                                ? AddQuestionsPage(
+                                    law: _selectedLawForQuestions!,
+                                    onBack: () => setState(() {
+                                      _isAddingQuestions = false;
+                                      _selectedLawForQuestions = null;
+                                    }),
+                                  )
+                                : BlocProvider(
+                                    create: (context) => getIt<QuestionsManagementCubit>()..init(),
+                                    child: QuestionsManagementPage(
+                                      onAddQuestions: (law) => setState(() {
+                                        _selectedLawForQuestions = law;
+                                        _isAddingQuestions = true;
+                                      }),
+                                    ),
+                                  ),
                           )
                         else if (_selectedTab == 3)
                           Expanded(
