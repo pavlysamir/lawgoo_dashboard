@@ -37,6 +37,17 @@ import '../../features/laws/presentation/bloc/laws_cubit.dart';
 import '../../features/laws/presentation/bloc/law_materials_cubit.dart';
 import '../../features/users/presentation/bloc/users_cubit.dart';
 
+// Questions Management
+import '../../features/questions_management/data/datasources/questions_remote_data_source.dart';
+import '../../features/questions_management/data/repositories/questions_repository_impl.dart';
+import '../../features/questions_management/domain/repositories/questions_repository.dart';
+import '../../features/questions_management/domain/usecases/add_question_usecase.dart';
+import '../../features/questions_management/domain/usecases/delete_question_usecase.dart';
+import '../../features/questions_management/domain/usecases/get_questions_usecase.dart';
+import '../../features/questions_management/domain/usecases/share_question_usecase.dart';
+import '../../features/questions_management/domain/usecases/toggle_question_status_usecase.dart';
+import '../../features/questions_management/presentation/bloc/questions_cubit.dart';
+
 final getIt = GetIt.instance;
 
 Future<void> initDependencies() async {
@@ -155,6 +166,37 @@ Future<void> initDependencies() async {
       deleteLawMaterial: getIt(),
       updateLawMaterial: getIt(),
       getLawMaterialsCount: getIt(),
+    ),
+  );
+
+  // Features - Questions Management
+  // Data sources
+  getIt.registerLazySingleton<QuestionsRemoteDataSource>(
+    () => QuestionsRemoteDataSourceImpl(firestore: getIt()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<QuestionsRepository>(
+    () => QuestionsRepositoryImpl(remoteDataSource: getIt()),
+  );
+
+  // Use cases
+  getIt.registerLazySingleton(() => AddQuestionUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetQuestionsUseCase(getIt()));
+  getIt.registerLazySingleton(() => ToggleQuestionStatusUseCase(getIt()));
+  getIt.registerLazySingleton(() => DeleteQuestionUseCase(getIt()));
+  getIt.registerLazySingleton(() => ShareQuestionUseCase(getIt()));
+
+  // Cubit
+  getIt.registerFactory(
+    () => QuestionsCubit(
+      addQuestion: getIt(),
+      getQuestions: getIt(),
+      toggleStatus: getIt(),
+      deleteQuestion: getIt(),
+      shareQuestion: getIt(),
+      getLaws: getIt(),
+      getLawMaterials: getIt(),
     ),
   );
 }
