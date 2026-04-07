@@ -11,9 +11,18 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   name: json['name'] as String,
   email: json['email'] as String,
   profileImage: json['profileImage'] as String?,
-  createdAt: UserModel._dateTimeFromTimestamp(json['createdAt'] as Timestamp),
+  createdAt: UserModel._dateTimeFromTimestamp(json['createdAt']),
   isActive: json['isActive'] as bool,
-  countCompletedLevels: (json['countCompletedLevels'] as num?)?.toInt() ?? 0,
+  countCompletedLevels: (json['count_completed_levels'] as num?)?.toInt() ?? 0,
+  totalPoints: (json['totalPoints'] as num?)?.toInt() ?? 0,
+  correctAnswers: (json['correctAnswers'] as num?)?.toInt() ?? 0,
+  totalAnswers: (json['totalAnswers'] as num?)?.toInt() ?? 0,
+  accuracy: (json['accuracy'] as num?)?.toDouble() ?? 0.0,
+  currentStreak: (json['currentStreak'] as num?)?.toInt() ?? 0,
+  lastLoginDate: UserModel._nullableDateTimeFromTimestamp(
+    json['lastLoginDate'],
+  ),
+  role: json['role'] as String? ?? 'user',
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -22,6 +31,13 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'email': instance.email,
   'profileImage': instance.profileImage,
   'isActive': instance.isActive,
-  'countCompletedLevels': instance.countCompletedLevels,
+  'count_completed_levels': instance.countCompletedLevels,
+  'totalPoints': instance.totalPoints,
+  'correctAnswers': instance.correctAnswers,
+  'totalAnswers': instance.totalAnswers,
+  'accuracy': instance.accuracy,
+  'currentStreak': instance.currentStreak,
+  'role': instance.role,
   'createdAt': UserModel._dateTimeToTimestamp(instance.createdAt),
+  'lastLoginDate': UserModel._dateTimeToTimestamp(instance.lastLoginDate),
 };

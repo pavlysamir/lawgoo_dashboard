@@ -12,6 +12,8 @@ import 'package:lowgos_dashboard/features/users/presentation/pages/users_page.da
 import 'package:lowgos_dashboard/features/questions_management/presentation/bloc/questions_management_cubit.dart';
 import 'package:lowgos_dashboard/features/questions_management/presentation/pages/questions_management_page.dart';
 import 'package:lowgos_dashboard/features/questions_management/presentation/pages/add_questions_page.dart';
+import 'package:lowgos_dashboard/features/settings/presentation/bloc/settings_cubit.dart';
+import 'package:lowgos_dashboard/features/settings/presentation/pages/settings_page.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../../core/utils/app_colors.dart';
@@ -133,6 +135,13 @@ class _DashboardPageState extends State<DashboardPage> {
                                     law: _selectedLawForMaterials!,
                                     onBack: () => setState(() => _selectedLawForMaterials = null),
                                   ),
+                          )
+                        else if (_selectedTab == 4)
+                          Expanded(
+                            child: BlocProvider(
+                              create: (context) => getIt<SettingsCubit>()..init(),
+                              child: const SettingsPage(),
+                            ),
                           )
                         else
                           const Expanded(
@@ -272,41 +281,41 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-}
 
-Widget _buildPagination(int currentPage) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      IconButton(onPressed: () {}, icon: const Icon(Icons.chevron_left)),
-      ...List.generate(5, (index) {
-        int page = index + 1;
-        bool isSelected = page == currentPage;
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            page.toString(),
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black87,
-              fontFamily: 'Cairo',
+  Widget _buildPagination(int currentPage) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(onPressed: () {}, icon: const Icon(Icons.chevron_left)),
+        ...List.generate(5, (index) {
+          int page = index + 1;
+          bool isSelected = page == currentPage;
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primary : Colors.transparent,
+              shape: BoxShape.circle,
             ),
-          ),
-        );
-      }),
-      const Text('...', style: TextStyle(color: Colors.grey)),
-      const SizedBox(width: 8),
-      const Text('9', style: TextStyle(fontFamily: 'Cairo')),
-      IconButton(onPressed: () {}, icon: const Icon(Icons.chevron_right)),
-      const Spacer(),
-      const Text(
-        'عرض 4 مستخدمين من إجمالي 45',
-        style: TextStyle(color: Colors.grey, fontFamily: 'Cairo', fontSize: 12),
-      ),
-    ],
-  );
+            child: Text(
+              page.toString(),
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black87,
+                fontFamily: 'Cairo',
+              ),
+            ),
+          );
+        }),
+        const Text('...', style: TextStyle(color: Colors.grey)),
+        const SizedBox(width: 8),
+        const Text('9', style: TextStyle(fontFamily: 'Cairo')),
+        IconButton(onPressed: () {}, icon: const Icon(Icons.chevron_right)),
+        const Spacer(),
+        const Text(
+          'عرض 4 مستخدمين من إجمالي 45',
+          style: TextStyle(color: Colors.grey, fontFamily: 'Cairo', fontSize: 12),
+        ),
+      ],
+    );
+  }
 }

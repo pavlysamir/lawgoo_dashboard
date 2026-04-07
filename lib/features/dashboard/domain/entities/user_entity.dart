@@ -8,6 +8,19 @@ class UserEntity extends Equatable {
   final DateTime createdAt;
   final bool isActive;
   final int countCompletedLevels;
+  
+  // stats
+  final int totalPoints;
+  final int correctAnswers;
+  final int totalAnswers;
+  final double accuracy;
+
+  // streak
+  final int currentStreak;
+  final DateTime? lastLoginDate;
+
+  // role
+  final String role;
 
   const UserEntity({
     required this.id,
@@ -16,7 +29,14 @@ class UserEntity extends Equatable {
     this.profileImage,
     required this.createdAt,
     required this.isActive,
-    required this.countCompletedLevels,
+    this.countCompletedLevels = 0,
+    this.totalPoints = 0,
+    this.correctAnswers = 0,
+    this.totalAnswers = 0,
+    this.accuracy = 0.0,
+    this.currentStreak = 0,
+    this.lastLoginDate,
+    this.role = 'user',
   });
 
   @override
@@ -28,5 +48,12 @@ class UserEntity extends Equatable {
         createdAt,
         isActive,
         countCompletedLevels,
+        totalPoints,
+        correctAnswers,
+        totalAnswers,
+        accuracy,
+        currentStreak,
+        lastLoginDate,
+        role,
       ];
 }
