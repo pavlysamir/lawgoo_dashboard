@@ -21,6 +21,7 @@ abstract class QuestionsState with _$QuestionsState {
     @Default(false) bool isAddingQuestion,
     @Default(false) bool addQuestionSuccess,
     @Default('') String searchQuery,
+    Question? editingQuestion,
   }) = _QuestionsState;
   factory QuestionsState.initial() => const QuestionsState();
 }

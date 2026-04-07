@@ -8,6 +8,7 @@ class QuestionsListSection extends StatelessWidget {
   final List<Question> questions;
   final Function(String, bool) onToggleStatus;
   final Function(String) onDelete;
+  final Function(Question) onEdit;
   final Function(String) onSearch;
 
   const QuestionsListSection({
@@ -15,6 +16,7 @@ class QuestionsListSection extends StatelessWidget {
     required this.questions,
     required this.onToggleStatus,
     required this.onDelete,
+    required this.onEdit,
     required this.onSearch,
   });
 
@@ -113,7 +115,7 @@ class QuestionsListSection extends StatelessWidget {
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () {}, // Edit not requested but shown in design
+                          onPressed: () => onEdit(q),
                           icon: const Icon(Icons.edit_outlined, color: AppColors.grey600, size: 20),
                         ),
                         IconButton(

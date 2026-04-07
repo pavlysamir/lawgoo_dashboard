@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$QuestionsState {
 
- bool get isLoading; List<Question> get questions; List<LawEntity> get laws; List<LawMaterialEntity> get materials; String? get selectedLawId; String? get selectedMaterialId; int get selectedLevel; Failure? get failure; bool get isAddingQuestion; bool get addQuestionSuccess; String get searchQuery;
+ bool get isLoading; List<Question> get questions; List<LawEntity> get laws; List<LawMaterialEntity> get materials; String? get selectedLawId; String? get selectedMaterialId; int get selectedLevel; Failure? get failure; bool get isAddingQuestion; bool get addQuestionSuccess; String get searchQuery; Question? get editingQuestion;
 /// Create a copy of QuestionsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $QuestionsStateCopyWith<QuestionsState> get copyWith => _$QuestionsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuestionsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.questions, questions)&&const DeepCollectionEquality().equals(other.laws, laws)&&const DeepCollectionEquality().equals(other.materials, materials)&&(identical(other.selectedLawId, selectedLawId) || other.selectedLawId == selectedLawId)&&(identical(other.selectedMaterialId, selectedMaterialId) || other.selectedMaterialId == selectedMaterialId)&&(identical(other.selectedLevel, selectedLevel) || other.selectedLevel == selectedLevel)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.isAddingQuestion, isAddingQuestion) || other.isAddingQuestion == isAddingQuestion)&&(identical(other.addQuestionSuccess, addQuestionSuccess) || other.addQuestionSuccess == addQuestionSuccess)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuestionsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.questions, questions)&&const DeepCollectionEquality().equals(other.laws, laws)&&const DeepCollectionEquality().equals(other.materials, materials)&&(identical(other.selectedLawId, selectedLawId) || other.selectedLawId == selectedLawId)&&(identical(other.selectedMaterialId, selectedMaterialId) || other.selectedMaterialId == selectedMaterialId)&&(identical(other.selectedLevel, selectedLevel) || other.selectedLevel == selectedLevel)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.isAddingQuestion, isAddingQuestion) || other.isAddingQuestion == isAddingQuestion)&&(identical(other.addQuestionSuccess, addQuestionSuccess) || other.addQuestionSuccess == addQuestionSuccess)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.editingQuestion, editingQuestion) || other.editingQuestion == editingQuestion));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(questions),const DeepCollectionEquality().hash(laws),const DeepCollectionEquality().hash(materials),selectedLawId,selectedMaterialId,selectedLevel,failure,isAddingQuestion,addQuestionSuccess,searchQuery);
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(questions),const DeepCollectionEquality().hash(laws),const DeepCollectionEquality().hash(materials),selectedLawId,selectedMaterialId,selectedLevel,failure,isAddingQuestion,addQuestionSuccess,searchQuery,editingQuestion);
 
 @override
 String toString() {
-  return 'QuestionsState(isLoading: $isLoading, questions: $questions, laws: $laws, materials: $materials, selectedLawId: $selectedLawId, selectedMaterialId: $selectedMaterialId, selectedLevel: $selectedLevel, failure: $failure, isAddingQuestion: $isAddingQuestion, addQuestionSuccess: $addQuestionSuccess, searchQuery: $searchQuery)';
+  return 'QuestionsState(isLoading: $isLoading, questions: $questions, laws: $laws, materials: $materials, selectedLawId: $selectedLawId, selectedMaterialId: $selectedMaterialId, selectedLevel: $selectedLevel, failure: $failure, isAddingQuestion: $isAddingQuestion, addQuestionSuccess: $addQuestionSuccess, searchQuery: $searchQuery, editingQuestion: $editingQuestion)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $QuestionsStateCopyWith<$Res>  {
   factory $QuestionsStateCopyWith(QuestionsState value, $Res Function(QuestionsState) _then) = _$QuestionsStateCopyWithImpl;
 @useResult
 $Res call({
- bool isLoading, List<Question> questions, List<LawEntity> laws, List<LawMaterialEntity> materials, String? selectedLawId, String? selectedMaterialId, int selectedLevel, Failure? failure, bool isAddingQuestion, bool addQuestionSuccess, String searchQuery
+ bool isLoading, List<Question> questions, List<LawEntity> laws, List<LawMaterialEntity> materials, String? selectedLawId, String? selectedMaterialId, int selectedLevel, Failure? failure, bool isAddingQuestion, bool addQuestionSuccess, String searchQuery, Question? editingQuestion
 });
 
 
@@ -62,7 +62,7 @@ class _$QuestionsStateCopyWithImpl<$Res>
 
 /// Create a copy of QuestionsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? questions = null,Object? laws = null,Object? materials = null,Object? selectedLawId = freezed,Object? selectedMaterialId = freezed,Object? selectedLevel = null,Object? failure = freezed,Object? isAddingQuestion = null,Object? addQuestionSuccess = null,Object? searchQuery = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? questions = null,Object? laws = null,Object? materials = null,Object? selectedLawId = freezed,Object? selectedMaterialId = freezed,Object? selectedLevel = null,Object? failure = freezed,Object? isAddingQuestion = null,Object? addQuestionSuccess = null,Object? searchQuery = null,Object? editingQuestion = freezed,}) {
   return _then(_self.copyWith(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,questions: null == questions ? _self.questions : questions // ignore: cast_nullable_to_non_nullable
@@ -75,7 +75,8 @@ as int,failure: freezed == failure ? _self.failure : failure // ignore: cast_nul
 as Failure?,isAddingQuestion: null == isAddingQuestion ? _self.isAddingQuestion : isAddingQuestion // ignore: cast_nullable_to_non_nullable
 as bool,addQuestionSuccess: null == addQuestionSuccess ? _self.addQuestionSuccess : addQuestionSuccess // ignore: cast_nullable_to_non_nullable
 as bool,searchQuery: null == searchQuery ? _self.searchQuery : searchQuery // ignore: cast_nullable_to_non_nullable
-as String,
+as String,editingQuestion: freezed == editingQuestion ? _self.editingQuestion : editingQuestion // ignore: cast_nullable_to_non_nullable
+as Question?,
   ));
 }
 
@@ -160,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  List<Question> questions,  List<LawEntity> laws,  List<LawMaterialEntity> materials,  String? selectedLawId,  String? selectedMaterialId,  int selectedLevel,  Failure? failure,  bool isAddingQuestion,  bool addQuestionSuccess,  String searchQuery)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  List<Question> questions,  List<LawEntity> laws,  List<LawMaterialEntity> materials,  String? selectedLawId,  String? selectedMaterialId,  int selectedLevel,  Failure? failure,  bool isAddingQuestion,  bool addQuestionSuccess,  String searchQuery,  Question? editingQuestion)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuestionsState() when $default != null:
-return $default(_that.isLoading,_that.questions,_that.laws,_that.materials,_that.selectedLawId,_that.selectedMaterialId,_that.selectedLevel,_that.failure,_that.isAddingQuestion,_that.addQuestionSuccess,_that.searchQuery);case _:
+return $default(_that.isLoading,_that.questions,_that.laws,_that.materials,_that.selectedLawId,_that.selectedMaterialId,_that.selectedLevel,_that.failure,_that.isAddingQuestion,_that.addQuestionSuccess,_that.searchQuery,_that.editingQuestion);case _:
   return orElse();
 
 }
@@ -181,10 +182,10 @@ return $default(_that.isLoading,_that.questions,_that.laws,_that.materials,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  List<Question> questions,  List<LawEntity> laws,  List<LawMaterialEntity> materials,  String? selectedLawId,  String? selectedMaterialId,  int selectedLevel,  Failure? failure,  bool isAddingQuestion,  bool addQuestionSuccess,  String searchQuery)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  List<Question> questions,  List<LawEntity> laws,  List<LawMaterialEntity> materials,  String? selectedLawId,  String? selectedMaterialId,  int selectedLevel,  Failure? failure,  bool isAddingQuestion,  bool addQuestionSuccess,  String searchQuery,  Question? editingQuestion)  $default,) {final _that = this;
 switch (_that) {
 case _QuestionsState():
-return $default(_that.isLoading,_that.questions,_that.laws,_that.materials,_that.selectedLawId,_that.selectedMaterialId,_that.selectedLevel,_that.failure,_that.isAddingQuestion,_that.addQuestionSuccess,_that.searchQuery);case _:
+return $default(_that.isLoading,_that.questions,_that.laws,_that.materials,_that.selectedLawId,_that.selectedMaterialId,_that.selectedLevel,_that.failure,_that.isAddingQuestion,_that.addQuestionSuccess,_that.searchQuery,_that.editingQuestion);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +202,10 @@ return $default(_that.isLoading,_that.questions,_that.laws,_that.materials,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  List<Question> questions,  List<LawEntity> laws,  List<LawMaterialEntity> materials,  String? selectedLawId,  String? selectedMaterialId,  int selectedLevel,  Failure? failure,  bool isAddingQuestion,  bool addQuestionSuccess,  String searchQuery)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  List<Question> questions,  List<LawEntity> laws,  List<LawMaterialEntity> materials,  String? selectedLawId,  String? selectedMaterialId,  int selectedLevel,  Failure? failure,  bool isAddingQuestion,  bool addQuestionSuccess,  String searchQuery,  Question? editingQuestion)?  $default,) {final _that = this;
 switch (_that) {
 case _QuestionsState() when $default != null:
-return $default(_that.isLoading,_that.questions,_that.laws,_that.materials,_that.selectedLawId,_that.selectedMaterialId,_that.selectedLevel,_that.failure,_that.isAddingQuestion,_that.addQuestionSuccess,_that.searchQuery);case _:
+return $default(_that.isLoading,_that.questions,_that.laws,_that.materials,_that.selectedLawId,_that.selectedMaterialId,_that.selectedLevel,_that.failure,_that.isAddingQuestion,_that.addQuestionSuccess,_that.searchQuery,_that.editingQuestion);case _:
   return null;
 
 }
@@ -216,7 +217,7 @@ return $default(_that.isLoading,_that.questions,_that.laws,_that.materials,_that
 
 
 class _QuestionsState extends QuestionsState {
-  const _QuestionsState({this.isLoading = false, final  List<Question> questions = const [], final  List<LawEntity> laws = const [], final  List<LawMaterialEntity> materials = const [], this.selectedLawId, this.selectedMaterialId, this.selectedLevel = 1, this.failure, this.isAddingQuestion = false, this.addQuestionSuccess = false, this.searchQuery = ''}): _questions = questions,_laws = laws,_materials = materials,super._();
+  const _QuestionsState({this.isLoading = false, final  List<Question> questions = const [], final  List<LawEntity> laws = const [], final  List<LawMaterialEntity> materials = const [], this.selectedLawId, this.selectedMaterialId, this.selectedLevel = 1, this.failure, this.isAddingQuestion = false, this.addQuestionSuccess = false, this.searchQuery = '', this.editingQuestion}): _questions = questions,_laws = laws,_materials = materials,super._();
   
 
 @override@JsonKey() final  bool isLoading;
@@ -248,6 +249,7 @@ class _QuestionsState extends QuestionsState {
 @override@JsonKey() final  bool isAddingQuestion;
 @override@JsonKey() final  bool addQuestionSuccess;
 @override@JsonKey() final  String searchQuery;
+@override final  Question? editingQuestion;
 
 /// Create a copy of QuestionsState
 /// with the given fields replaced by the non-null parameter values.
@@ -259,16 +261,16 @@ _$QuestionsStateCopyWith<_QuestionsState> get copyWith => __$QuestionsStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuestionsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._questions, _questions)&&const DeepCollectionEquality().equals(other._laws, _laws)&&const DeepCollectionEquality().equals(other._materials, _materials)&&(identical(other.selectedLawId, selectedLawId) || other.selectedLawId == selectedLawId)&&(identical(other.selectedMaterialId, selectedMaterialId) || other.selectedMaterialId == selectedMaterialId)&&(identical(other.selectedLevel, selectedLevel) || other.selectedLevel == selectedLevel)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.isAddingQuestion, isAddingQuestion) || other.isAddingQuestion == isAddingQuestion)&&(identical(other.addQuestionSuccess, addQuestionSuccess) || other.addQuestionSuccess == addQuestionSuccess)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuestionsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._questions, _questions)&&const DeepCollectionEquality().equals(other._laws, _laws)&&const DeepCollectionEquality().equals(other._materials, _materials)&&(identical(other.selectedLawId, selectedLawId) || other.selectedLawId == selectedLawId)&&(identical(other.selectedMaterialId, selectedMaterialId) || other.selectedMaterialId == selectedMaterialId)&&(identical(other.selectedLevel, selectedLevel) || other.selectedLevel == selectedLevel)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.isAddingQuestion, isAddingQuestion) || other.isAddingQuestion == isAddingQuestion)&&(identical(other.addQuestionSuccess, addQuestionSuccess) || other.addQuestionSuccess == addQuestionSuccess)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.editingQuestion, editingQuestion) || other.editingQuestion == editingQuestion));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_questions),const DeepCollectionEquality().hash(_laws),const DeepCollectionEquality().hash(_materials),selectedLawId,selectedMaterialId,selectedLevel,failure,isAddingQuestion,addQuestionSuccess,searchQuery);
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_questions),const DeepCollectionEquality().hash(_laws),const DeepCollectionEquality().hash(_materials),selectedLawId,selectedMaterialId,selectedLevel,failure,isAddingQuestion,addQuestionSuccess,searchQuery,editingQuestion);
 
 @override
 String toString() {
-  return 'QuestionsState(isLoading: $isLoading, questions: $questions, laws: $laws, materials: $materials, selectedLawId: $selectedLawId, selectedMaterialId: $selectedMaterialId, selectedLevel: $selectedLevel, failure: $failure, isAddingQuestion: $isAddingQuestion, addQuestionSuccess: $addQuestionSuccess, searchQuery: $searchQuery)';
+  return 'QuestionsState(isLoading: $isLoading, questions: $questions, laws: $laws, materials: $materials, selectedLawId: $selectedLawId, selectedMaterialId: $selectedMaterialId, selectedLevel: $selectedLevel, failure: $failure, isAddingQuestion: $isAddingQuestion, addQuestionSuccess: $addQuestionSuccess, searchQuery: $searchQuery, editingQuestion: $editingQuestion)';
 }
 
 
@@ -279,7 +281,7 @@ abstract mixin class _$QuestionsStateCopyWith<$Res> implements $QuestionsStateCo
   factory _$QuestionsStateCopyWith(_QuestionsState value, $Res Function(_QuestionsState) _then) = __$QuestionsStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isLoading, List<Question> questions, List<LawEntity> laws, List<LawMaterialEntity> materials, String? selectedLawId, String? selectedMaterialId, int selectedLevel, Failure? failure, bool isAddingQuestion, bool addQuestionSuccess, String searchQuery
+ bool isLoading, List<Question> questions, List<LawEntity> laws, List<LawMaterialEntity> materials, String? selectedLawId, String? selectedMaterialId, int selectedLevel, Failure? failure, bool isAddingQuestion, bool addQuestionSuccess, String searchQuery, Question? editingQuestion
 });
 
 
@@ -296,7 +298,7 @@ class __$QuestionsStateCopyWithImpl<$Res>
 
 /// Create a copy of QuestionsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? questions = null,Object? laws = null,Object? materials = null,Object? selectedLawId = freezed,Object? selectedMaterialId = freezed,Object? selectedLevel = null,Object? failure = freezed,Object? isAddingQuestion = null,Object? addQuestionSuccess = null,Object? searchQuery = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? questions = null,Object? laws = null,Object? materials = null,Object? selectedLawId = freezed,Object? selectedMaterialId = freezed,Object? selectedLevel = null,Object? failure = freezed,Object? isAddingQuestion = null,Object? addQuestionSuccess = null,Object? searchQuery = null,Object? editingQuestion = freezed,}) {
   return _then(_QuestionsState(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,questions: null == questions ? _self._questions : questions // ignore: cast_nullable_to_non_nullable
@@ -309,7 +311,8 @@ as int,failure: freezed == failure ? _self.failure : failure // ignore: cast_nul
 as Failure?,isAddingQuestion: null == isAddingQuestion ? _self.isAddingQuestion : isAddingQuestion // ignore: cast_nullable_to_non_nullable
 as bool,addQuestionSuccess: null == addQuestionSuccess ? _self.addQuestionSuccess : addQuestionSuccess // ignore: cast_nullable_to_non_nullable
 as bool,searchQuery: null == searchQuery ? _self.searchQuery : searchQuery // ignore: cast_nullable_to_non_nullable
-as String,
+as String,editingQuestion: freezed == editingQuestion ? _self.editingQuestion : editingQuestion // ignore: cast_nullable_to_non_nullable
+as Question?,
   ));
 }
 

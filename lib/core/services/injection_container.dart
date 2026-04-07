@@ -46,6 +46,7 @@ import '../../features/questions_management/domain/usecases/delete_question_usec
 import '../../features/questions_management/domain/usecases/get_questions_usecase.dart';
 import '../../features/questions_management/domain/usecases/share_question_usecase.dart';
 import '../../features/questions_management/domain/usecases/toggle_question_status_usecase.dart';
+import '../../features/questions_management/domain/usecases/update_question_usecase.dart';
 import '../../features/questions_management/presentation/bloc/questions_cubit.dart';
 
 final getIt = GetIt.instance;
@@ -186,6 +187,7 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => ToggleQuestionStatusUseCase(getIt()));
   getIt.registerLazySingleton(() => DeleteQuestionUseCase(getIt()));
   getIt.registerLazySingleton(() => ShareQuestionUseCase(getIt()));
+  getIt.registerLazySingleton(() => UpdateQuestionUseCase(getIt()));
 
   // Cubit
   getIt.registerFactory(
@@ -195,6 +197,7 @@ Future<void> initDependencies() async {
       toggleStatus: getIt(),
       deleteQuestion: getIt(),
       shareQuestion: getIt(),
+      updateQuestion: getIt(),
       getLaws: getIt(),
       getLawMaterials: getIt(),
     ),

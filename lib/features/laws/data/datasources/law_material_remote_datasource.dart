@@ -101,14 +101,23 @@ class LawMaterialRemoteDataSourceImpl implements LawMaterialRemoteDataSource {
       'addLawMaterial',
       params: material.toJson(),
       call: () async {
+        final batch = firestore.batch();
         final docRef = firestore.collection('materials').doc();
-        await docRef.set({
+
+        batch.set(docRef, {
           ...material.toJson(),
           'id': docRef.id,
           'is_deleted': false,
           'created_at': FieldValue.serverTimestamp(),
           'updated_at': FieldValue.serverTimestamp(),
         });
+
+        batch.update(firestore.collection('laws').doc(material.lawId), {
+          'materials_count': FieldValue.increment(1),
+          'updated_at': FieldValue.serverTimestamp(),
+        });
+
+        await batch.commit();
       },
     );
   }
@@ -133,10 +142,24 @@ class LawMaterialRemoteDataSourceImpl implements LawMaterialRemoteDataSource {
       'deleteLawMaterial',
       params: {'id': materialId},
       call: () async {
-        await firestore.collection('materials').doc(materialId).update({
+        final doc = await firestore.collection('materials').doc(materialId).get();
+        if (!doc.exists) return;
+
+        final lawId = doc.data()?['law_id'] as String?;
+        if (lawId == null) return;
+
+        final batch = firestore.batch();
+        batch.update(firestore.collection('materials').doc(materialId), {
           'is_deleted': true,
           'updated_at': FieldValue.serverTimestamp(),
         });
+
+        batch.update(firestore.collection('laws').doc(lawId), {
+          'materials_count': FieldValue.increment(-1),
+          'updated_at': FieldValue.serverTimestamp(),
+        });
+
+        await batch.commit();
       },
     );
   }

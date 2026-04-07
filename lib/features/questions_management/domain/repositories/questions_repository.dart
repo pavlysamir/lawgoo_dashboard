@@ -8,4 +8,5 @@ abstract class QuestionsRepository {
   Future<Either<Failure, void>> updateQuestionStatus(String questionId, bool isActive);
   Future<Either<Failure, void>> deleteQuestion(String questionId);
   Future<Either<Failure, void>> shareQuestion(String questionId);
+  Future<Either<Failure, void>> updateQuestion(Question question);
 }

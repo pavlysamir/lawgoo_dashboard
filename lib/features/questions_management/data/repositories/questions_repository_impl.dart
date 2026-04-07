@@ -62,4 +62,15 @@ class QuestionsRepositoryImpl implements QuestionsRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateQuestion(Question question) async {
+    try {
+      final questionModel = QuestionModel.fromEntity(question);
+      await remoteDataSource.updateQuestion(questionModel);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

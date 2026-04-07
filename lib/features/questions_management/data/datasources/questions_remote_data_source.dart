@@ -8,6 +8,7 @@ abstract class QuestionsRemoteDataSource {
   Future<void> updateQuestionStatus(String questionId, bool isActive);
   Future<void> deleteQuestion(String questionId);
   Future<void> shareQuestion(String questionId);
+  Future<void> updateQuestion(QuestionModel question);
 }
 
 class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
@@ -18,21 +19,12 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
   @override
   Future<void> addQuestion(QuestionModel question) async {
     final docRef = firestore.collection('questions').doc();
-    final questionWithId = QuestionModel(
-      questionId: docRef.id,
-      lawId: question.lawId,
-      materialId: question.materialId,
-      level: question.level,
-      questionText: question.questionText,
-      answers: question.answers as List<AnswerModel>,
-      difficulty: question.difficulty,
-      type: question.type,
-      isShared: question.isShared,
-      isActive: question.isActive,
-      createdAt: FieldValue.serverTimestamp() as dynamic,
-      isDeleted: false,
-    );
-    await docRef.set(questionWithId.toJson());
+    final data = question.toJson();
+    data['question_id'] = docRef.id;
+    data['created_at'] = FieldValue.serverTimestamp();
+    data['updated_at'] = FieldValue.serverTimestamp();
+    data['is_deleted'] = false;
+    await docRef.set(data);
   }
 
   @override
@@ -45,7 +37,16 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
 
     return snapshot.docs.map((doc) {
       final data = doc.data();
-      data['question_id'] = doc.id; // ensuring ID is mapped
+      data['question_id'] = doc.id;
+      
+      // Convert Timestamps to ISO8601 strings to match QuestionModel.fromJson expectation
+      if (data['created_at'] is Timestamp) {
+        data['created_at'] = (data['created_at'] as Timestamp).toDate().toIso8601String();
+      }
+      if (data['updated_at'] is Timestamp) {
+        data['updated_at'] = (data['updated_at'] as Timestamp).toDate().toIso8601String();
+      }
+      
       return QuestionModel.fromJson(data);
     }).toList();
   }
@@ -72,5 +73,12 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
       'is_shared': true,
       'updated_at': FieldValue.serverTimestamp(),
     });
+  }
+
+  @override
+  Future<void> updateQuestion(QuestionModel question) async {
+    final data = question.toJson();
+    data['updated_at'] = FieldValue.serverTimestamp();
+    await firestore.collection('questions').doc(question.questionId).update(data);
   }
 }

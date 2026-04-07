@@ -52,12 +52,17 @@ class _AddQuestionsPageState extends State<AddQuestionsPage> {
                 // 2. Add Question Form Section
                 AddQuestionForm(
                   materials: state.materials,
+                  initialQuestion: state.editingQuestion,
                   onAddQuestion: (question) {
-                    final qToAdd = question.copyWith(
-                      lawId: widget.law.id,
-                      level: state.selectedLevel,
-                    );
-                    context.read<QuestionsCubit>().addNewQuestion(qToAdd);
+                    if (state.editingQuestion != null) {
+                      context.read<QuestionsCubit>().updateExistingQuestion(question);
+                    } else {
+                      final qToAdd = question.copyWith(
+                        lawId: widget.law.id,
+                        level: state.selectedLevel,
+                      );
+                      context.read<QuestionsCubit>().addNewQuestion(qToAdd);
+                    }
                   },
                 ),
                 const SizedBox(height: 32),
@@ -70,6 +75,7 @@ class _AddQuestionsPageState extends State<AddQuestionsPage> {
                       .toggleQuestionActive(id, isActive),
                   onDelete: (id) =>
                       context.read<QuestionsCubit>().removeQuestion(id),
+                  onEdit: (q) => context.read<QuestionsCubit>().editQuestion(q),
                   onSearch: (q) =>
                       context.read<QuestionsCubit>().updateSearch(q),
                 ),

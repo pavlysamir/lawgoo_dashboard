@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lowgos_dashboard/core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../laws/domain/usecases/get_laws_use_case.dart';
 import '../../../laws/domain/usecases/get_law_materials_use_case.dart';
@@ -8,6 +9,7 @@ import '../../domain/usecases/get_questions_usecase.dart';
 import '../../domain/usecases/toggle_question_status_usecase.dart';
 import '../../domain/usecases/delete_question_usecase.dart';
 import '../../domain/usecases/share_question_usecase.dart';
+import '../../domain/usecases/update_question_usecase.dart';
 import 'questions_state.dart';
 
 class QuestionsCubit extends Cubit<QuestionsState> {
@@ -16,6 +18,7 @@ class QuestionsCubit extends Cubit<QuestionsState> {
   final ToggleQuestionStatusUseCase toggleStatus;
   final DeleteQuestionUseCase deleteQuestion;
   final ShareQuestionUseCase shareQuestion;
+  final UpdateQuestionUseCase updateQuestion;
   final GetLawsUseCase getLaws;
   final GetLawMaterialsUseCase getLawMaterials;
 
@@ -25,6 +28,7 @@ class QuestionsCubit extends Cubit<QuestionsState> {
     required this.toggleStatus,
     required this.deleteQuestion,
     required this.shareQuestion,
+    required this.updateQuestion,
     required this.getLaws,
     required this.getLawMaterials,
   }) : super(QuestionsState.initial());
@@ -79,8 +83,19 @@ class QuestionsCubit extends Cubit<QuestionsState> {
   }
 
   Future<void> addNewQuestion(Question question) async {
+    if (state.selectedLawId == null) {
+      emit(state.copyWith(failure: const ServerFailure('يرجى اختيار القانون')));
+      return;
+    }
+    
     emit(state.copyWith(isAddingQuestion: true, addQuestionSuccess: false));
-    final result = await addQuestion(question);
+    
+    final finalQuestion = question.copyWith(
+      lawId: state.selectedLawId,
+      level: state.selectedLevel,
+    );
+
+    final result = await addQuestion(finalQuestion);
     result.fold(
       (failure) => emit(state.copyWith(isAddingQuestion: false, failure: failure)),
       (_) {
@@ -88,6 +103,23 @@ class QuestionsCubit extends Cubit<QuestionsState> {
         _fetchQuestions();
       },
     );
+  }
+
+  Future<void> updateExistingQuestion(Question question) async {
+    emit(state.copyWith(isAddingQuestion: true, addQuestionSuccess: false));
+    
+    final result = await updateQuestion(question);
+    result.fold(
+      (failure) => emit(state.copyWith(isAddingQuestion: false, failure: failure)),
+      (_) {
+        emit(state.copyWith(isAddingQuestion: false, addQuestionSuccess: true, editingQuestion: null));
+        _fetchQuestions();
+      },
+    );
+  }
+
+  void editQuestion(Question? question) {
+    emit(state.copyWith(editingQuestion: question));
   }
 
   Future<void> toggleQuestionActive(String questionId, bool isActive) async {

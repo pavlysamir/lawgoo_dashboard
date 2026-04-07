@@ -8,11 +8,13 @@ import '../../domain/entities/answer.dart';
 class AddQuestionForm extends StatefulWidget {
   final List<LawMaterialEntity> materials;
   final Function(Question) onAddQuestion;
+  final Question? initialQuestion;
 
   const AddQuestionForm({
     super.key,
     required this.materials,
     required this.onAddQuestion,
+    this.initialQuestion,
   });
 
   @override
@@ -23,12 +25,56 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedMaterialId;
   String? _selectedMaterialContent;
-  bool _isActive = true;
+  bool _isActive = false;
   final _questionTextController = TextEditingController();
-  final List<TextEditingController> _answerControllers = List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _answerControllers =
+      List.generate(4, (_) => TextEditingController());
   int _correctAnswerIndex = 0;
   String _difficulty = 'سهل';
   String _type = 'mcq';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialQuestion != null) {
+      _populateForm(widget.initialQuestion!);
+    }
+  }
+
+  @override
+  void didUpdateWidget(AddQuestionForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialQuestion != oldWidget.initialQuestion) {
+      if (widget.initialQuestion != null) {
+        _populateForm(widget.initialQuestion!);
+      } else {
+        _resetForm();
+      }
+    }
+  }
+
+  void _populateForm(Question question) {
+    _selectedMaterialId = question.materialId;
+    final material = widget.materials.any((m) => m.id == question.materialId)
+        ? widget.materials.firstWhere((m) => m.id == question.materialId)
+        : null;
+    _selectedMaterialContent = material?.content;
+    _isActive = question.isActive;
+    _questionTextController.text = question.questionText;
+    _difficulty = question.difficulty == 'easy'
+        ? 'سهل'
+        : question.difficulty == 'medium'
+            ? 'متوسط'
+            : 'صعب';
+    _type = question.type;
+
+    for (int i = 0; i < question.answers.length && i < 4; i++) {
+      _answerControllers[i].text = question.answers[i].text;
+      if (question.answers[i].isCorrect) {
+        _correctAnswerIndex = i;
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -59,12 +105,17 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
       }
 
       final question = Question(
-        lawId: '', // To be filled by Cubit
+        questionId: widget.initialQuestion?.questionId,
+        lawId: widget.initialQuestion?.lawId ?? '',
         materialId: _selectedMaterialId!,
-        level: 1, // To be filled by Cubit
+        level: widget.initialQuestion?.level ?? 1,
         questionText: _questionTextController.text,
         answers: answers,
-        difficulty: _difficulty == 'سهل' ? 'easy' : _difficulty == 'متوسط' ? 'medium' : 'hard',
+        difficulty: _difficulty == 'سهل'
+            ? 'easy'
+            : _difficulty == 'متوسط'
+                ? 'medium'
+                : 'hard',
         type: _type,
         isActive: _isActive,
       );
@@ -81,9 +132,11 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
       controller.clear();
     }
     setState(() {
-      _isActive = true;
+      _isActive = false;
       _correctAnswerIndex = 0;
       _difficulty = 'سهل';
+      _selectedMaterialId = null;
+      _selectedMaterialContent = null;
     });
   }
 
@@ -111,7 +164,8 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
               children: [
                 const Icon(Icons.edit_note, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Text('إضافة سؤال', style: AppTextStyles.font18BoldBlack),
+                Text(widget.initialQuestion == null ? 'إضافة سؤال' : 'تعديل السؤال',
+                    style: AppTextStyles.font18BoldBlack),
               ],
             ),
             const SizedBox(height: 24),
@@ -311,11 +365,14 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
             Center(
               child: ElevatedButton.icon(
                 onPressed: _submitForm,
-                icon: const Icon(Icons.add, color: AppColors.white),
-                label: const Text('إضافة سؤال', style: TextStyle(fontFamily: 'Cairo', color: AppColors.white)),
+                icon: Icon(widget.initialQuestion == null ? Icons.add : Icons.save,
+                    color: AppColors.white),
+                label: Text(
+                    widget.initialQuestion == null ? 'إضافة سؤال' : 'تحديث السؤال',
+                    style: const TextStyle(fontFamily: 'Cairo', color: AppColors.white)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
-                  foregroundColor: AppColors.primary,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.white,
                   minimumSize: const Size(200, 50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   elevation: 0,
