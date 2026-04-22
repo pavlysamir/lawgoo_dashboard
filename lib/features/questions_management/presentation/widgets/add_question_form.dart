@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_text_styles.dart';
@@ -27,8 +31,10 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
   String? _selectedMaterialContent;
   bool _isActive = false;
   final _questionTextController = TextEditingController();
-  final List<TextEditingController> _answerControllers =
-      List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _answerControllers = List.generate(
+    4,
+    (_) => TextEditingController(),
+  );
   int _correctAnswerIndex = 0;
   String _difficulty = 'سهل';
   String _type = 'mcq';
@@ -64,8 +70,8 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
     _difficulty = question.difficulty == 'easy'
         ? 'سهل'
         : question.difficulty == 'medium'
-            ? 'متوسط'
-            : 'صعب';
+        ? 'متوسط'
+        : 'صعب';
     _type = question.type;
 
     for (int i = 0; i < question.answers.length && i < 4; i++) {
@@ -88,7 +94,13 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
   void _onMaterialChanged(String? value) {
     setState(() {
       _selectedMaterialId = value;
-      _selectedMaterialContent = widget.materials.firstWhere((m) => m.id == value).content;
+      if (value != null && widget.materials.any((m) => m.id == value)) {
+        _selectedMaterialContent = widget.materials
+            .firstWhere((m) => m.id == value)
+            .content;
+      } else {
+        _selectedMaterialContent = null;
+      }
     });
   }
 
@@ -114,8 +126,8 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
         difficulty: _difficulty == 'سهل'
             ? 'easy'
             : _difficulty == 'متوسط'
-                ? 'medium'
-                : 'hard',
+            ? 'medium'
+            : 'hard',
         type: _type,
         isActive: _isActive,
       );
@@ -138,6 +150,86 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
       _selectedMaterialId = null;
       _selectedMaterialContent = null;
     });
+  }
+
+  Future<void> _pickAndUploadJson() async {
+    if (_selectedMaterialId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'يرجى اختيار المادة أولاً',
+            style: TextStyle(fontFamily: 'Cairo'),
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null) {
+        String content;
+        if (kIsWeb) {
+          content = utf8.decode(result.files.first.bytes!);
+        } else {
+          final file = File(result.files.first.path!);
+          content = await file.readAsString();
+        }
+
+        final List<dynamic> jsonData = json.decode(content);
+        int count = 0;
+
+        for (var item in jsonData) {
+          final answers = (item['answers'] as List).map((a) {
+            return Answer(text: a['text'], isCorrect: a['is_correct']);
+          }).toList();
+
+          final question = Question(
+            lawId: widget.initialQuestion?.lawId ?? '',
+            materialId: _selectedMaterialId!,
+            level: widget.initialQuestion?.level ?? 1,
+            questionText: item['question_text'],
+            answers: answers,
+            difficulty: item['difficulty'],
+            type: item['type'],
+            isActive: _isActive,
+          );
+
+          widget.onAddQuestion(question);
+          count++;
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'تم إضافة $count أسئلة بنجاح',
+                style: const TextStyle(fontFamily: 'Cairo'),
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'خطأ في قراءة الملف: $e',
+              style: const TextStyle(fontFamily: 'Cairo'),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        print(e);
+      }
+    }
   }
 
   @override
@@ -164,8 +256,38 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
               children: [
                 const Icon(Icons.edit_note, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Text(widget.initialQuestion == null ? 'إضافة سؤال' : 'تعديل السؤال',
-                    style: AppTextStyles.font18BoldBlack),
+                Text(
+                  widget.initialQuestion == null
+                      ? 'إضافة سؤال'
+                      : 'تعديل السؤال',
+                  style: AppTextStyles.font18BoldBlack,
+                ),
+                const Spacer(),
+                if (widget.initialQuestion == null)
+                  TextButton.icon(
+                    onPressed: _pickAndUploadJson,
+                    icon: const Icon(
+                      Icons.upload_file,
+                      color: AppColors.primary,
+                    ),
+                    label: const Text(
+                      'رفع ملف JSON',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 24),
@@ -176,7 +298,10 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('إختر المادة', style: TextStyle(fontFamily: 'Cairo')),
+                      const Text(
+                        'إختر المادة',
+                        style: TextStyle(fontFamily: 'Cairo'),
+                      ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _selectedMaterialId,
@@ -184,11 +309,15 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                         items: widget.materials.map((m) {
                           return DropdownMenuItem(
                             value: m.id,
-                            child: Text('المادة ${m.order}', style: const TextStyle(fontFamily: 'Cairo')),
+                            child: Text(
+                              'المادة ${m.order}',
+                              style: const TextStyle(fontFamily: 'Cairo'),
+                            ),
                           );
                         }).toList(),
                         onChanged: _onMaterialChanged,
-                        validator: (value) => value == null ? 'يرجى اختيار المادة' : null,
+                        validator: (value) =>
+                            value == null ? 'يرجى اختيار المادة' : null,
                       ),
                     ],
                   ),
@@ -198,14 +327,29 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('حالة السؤال', style: TextStyle(fontFamily: 'Cairo')),
+                      const Text(
+                        'حالة السؤال',
+                        style: TextStyle(fontFamily: 'Cairo'),
+                      ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<bool>(
                         value: _isActive,
                         decoration: _inputDecoration('الحالة'),
                         items: const [
-                          DropdownMenuItem(value: true, child: Text('نشط', style: TextStyle(fontFamily: 'Cairo'))),
-                          DropdownMenuItem(value: false, child: Text('غير نشط', style: TextStyle(fontFamily: 'Cairo'))),
+                          DropdownMenuItem(
+                            value: true,
+                            child: Text(
+                              'نشط',
+                              style: TextStyle(fontFamily: 'Cairo'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: false,
+                            child: Text(
+                              'غير نشط',
+                              style: TextStyle(fontFamily: 'Cairo'),
+                            ),
+                          ),
                         ],
                         onChanged: (val) => setState(() => _isActive = val!),
                       ),
@@ -217,13 +361,18 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('نص السؤال', style: TextStyle(fontFamily: 'Cairo')),
+                      const Text(
+                        'نص السؤال',
+                        style: TextStyle(fontFamily: 'Cairo'),
+                      ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _questionTextController,
                         maxLines: 1,
                         decoration: _inputDecoration('اكتب نص السؤال هنا...'),
-                        validator: (value) => value == null || value.isEmpty ? 'يرجى كتابة نص السؤال' : null,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'يرجى كتابة نص السؤال'
+                            : null,
                       ),
                     ],
                   ),
@@ -239,7 +388,10 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('نص المادة المرتبطة (للقراءة فقط)', style: TextStyle(fontFamily: 'Cairo')),
+                      const Text(
+                        'نص المادة المرتبطة (للقراءة فقط)',
+                        style: TextStyle(fontFamily: 'Cairo'),
+                      ),
                       const SizedBox(height: 8),
                       Container(
                         width: double.infinity,
@@ -250,8 +402,13 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                           border: Border.all(color: AppColors.grey200),
                         ),
                         child: Text(
-                          _selectedMaterialContent ?? 'اختر مادة ليظهر نصها هنا...',
-                          style: TextStyle(fontFamily: 'Cairo', color: AppColors.grey600, fontSize: 12),
+                          _selectedMaterialContent ??
+                              'اختر مادة ليظهر نصها هنا...',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            color: AppColors.grey600,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ],
@@ -263,16 +420,43 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('نوع السؤال', style: TextStyle(fontFamily: 'Cairo')),
+                      const Text(
+                        'نوع السؤال',
+                        style: TextStyle(fontFamily: 'Cairo'),
+                      ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _type,
                         decoration: _inputDecoration('اختر النوع'),
                         items: const [
-                          DropdownMenuItem(value: 'mcq', child: Text('مقالي', style: TextStyle(fontFamily: 'Cairo'))),
-                          DropdownMenuItem(value: 'true_false', child: Text('صح أو خطأ', style: TextStyle(fontFamily: 'Cairo'))),
-                          DropdownMenuItem(value: 'fill', child: Text('أكمل', style: TextStyle(fontFamily: 'Cairo'))),
-                          DropdownMenuItem(value: 'case', child: Text('قضية', style: TextStyle(fontFamily: 'Cairo'))),
+                          DropdownMenuItem(
+                            value: 'mcq',
+                            child: Text(
+                              'مقالي',
+                              style: TextStyle(fontFamily: 'Cairo'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'true_false',
+                            child: Text(
+                              'صح أو خطأ',
+                              style: TextStyle(fontFamily: 'Cairo'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'fill',
+                            child: Text(
+                              'أكمل',
+                              style: TextStyle(fontFamily: 'Cairo'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'case',
+                            child: Text(
+                              'قضية',
+                              style: TextStyle(fontFamily: 'Cairo'),
+                            ),
+                          ),
                         ],
                         onChanged: (val) => setState(() => _type = val!),
                       ),
@@ -285,7 +469,10 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('مستوى الصعوبة', style: TextStyle(fontFamily: 'Cairo')),
+                      const Text(
+                        'مستوى الصعوبة',
+                        style: TextStyle(fontFamily: 'Cairo'),
+                      ),
                       const SizedBox(height: 8),
                       Row(
                         children: ['سهل', 'متوسط', 'صعب'].map((diff) {
@@ -295,12 +482,26 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                               onTap: () => setState(() => _difficulty = diff),
                               child: Container(
                                 margin: const EdgeInsets.only(right: 4),
-                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? (diff == 'سهل' ? Colors.green.withOpacity(0.1) : diff == 'متوسط' ? Colors.orange.withOpacity(0.1) : Colors.red.withOpacity(0.1)) : AppColors.white,
+                                  color: isSelected
+                                      ? (diff == 'سهل'
+                                            ? Colors.green.withOpacity(0.1)
+                                            : diff == 'متوسط'
+                                            ? Colors.orange.withOpacity(0.1)
+                                            : Colors.red.withOpacity(0.1))
+                                      : AppColors.white,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: isSelected ? (diff == 'سهل' ? Colors.green : diff == 'متوسط' ? Colors.orange : Colors.red) : AppColors.grey200,
+                                    color: isSelected
+                                        ? (diff == 'سهل'
+                                              ? Colors.green
+                                              : diff == 'متوسط'
+                                              ? Colors.orange
+                                              : Colors.red)
+                                        : AppColors.grey200,
                                   ),
                                 ),
                                 child: Center(
@@ -309,8 +510,16 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                                     style: TextStyle(
                                       fontFamily: 'Cairo',
                                       fontSize: 12,
-                                      color: isSelected ? (diff == 'سهل' ? Colors.green : diff == 'متوسط' ? Colors.orange : Colors.red) : AppColors.grey600,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      color: isSelected
+                                          ? (diff == 'سهل'
+                                                ? Colors.green
+                                                : diff == 'متوسط'
+                                                ? Colors.orange
+                                                : Colors.red)
+                                          : AppColors.grey600,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                     ),
                                   ),
                                 ),
@@ -325,8 +534,21 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
               ],
             ),
             const SizedBox(height: 24),
-            const Text('الخيارات', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
-            const Text('حدد الإجابة الصحيحة', style: TextStyle(fontFamily: 'Cairo', fontSize: 10, color: Colors.grey)),
+            const Text(
+              'الخيارات',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Text(
+              'حدد الإجابة الصحيحة',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 10,
+                color: Colors.grey,
+              ),
+            ),
             const SizedBox(height: 12),
             GridView.builder(
               shrinkWrap: true,
@@ -345,18 +567,27 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                     Radio<int>(
                       value: index,
                       groupValue: _correctAnswerIndex,
-                      onChanged: (val) => setState(() => _correctAnswerIndex = val!),
+                      onChanged: (val) =>
+                          setState(() => _correctAnswerIndex = val!),
                       activeColor: Colors.blue,
                     ),
                     Expanded(
                       child: TextFormField(
                         controller: _answerControllers[index],
                         decoration: _inputDecoration('الخيار $label'),
-                        validator: (value) => value == null || value.isEmpty ? 'يرجى كتابة الخيار' : null,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'يرجى كتابة الخيار'
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(label, style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 );
               },
@@ -365,16 +596,26 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
             Center(
               child: ElevatedButton.icon(
                 onPressed: _submitForm,
-                icon: Icon(widget.initialQuestion == null ? Icons.add : Icons.save,
-                    color: AppColors.white),
+                icon: Icon(
+                  widget.initialQuestion == null ? Icons.add : Icons.save,
+                  color: AppColors.white,
+                ),
                 label: Text(
-                    widget.initialQuestion == null ? 'إضافة سؤال' : 'تحديث السؤال',
-                    style: const TextStyle(fontFamily: 'Cairo', color: AppColors.white)),
+                  widget.initialQuestion == null
+                      ? 'إضافة سؤال'
+                      : 'تحديث السؤال',
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    color: AppColors.white,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.white,
                   minimumSize: const Size(200, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   elevation: 0,
                 ),
               ),
@@ -388,7 +629,11 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppColors.grey400),
+      hintStyle: const TextStyle(
+        fontFamily: 'Cairo',
+        fontSize: 13,
+        color: AppColors.grey400,
+      ),
       filled: true,
       fillColor: AppColors.grey50,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
