@@ -24,9 +24,9 @@ class QuestionsRepositoryImpl implements QuestionsRepository {
   }
 
   @override
-  Future<Either<Failure, List<Question>>> getQuestions() async {
+  Future<Either<Failure, List<Question>>> getQuestions({String? lawId}) async {
     try {
-      final questions = await remoteDataSource.getQuestions();
+      final questions = await remoteDataSource.getQuestions(lawId: lawId);
       return Right(questions);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

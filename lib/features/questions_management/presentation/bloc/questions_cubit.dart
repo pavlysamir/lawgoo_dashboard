@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lowgos_dashboard/core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
 import '../../../laws/domain/usecases/get_laws_use_case.dart';
 import '../../../laws/domain/usecases/get_law_materials_use_case.dart';
 import '../../domain/entities/question.dart';
@@ -36,26 +35,33 @@ class QuestionsCubit extends Cubit<QuestionsState> {
   Future<void> init() async {
     emit(state.copyWith(isLoading: true));
     await _fetchLaws();
-    await _fetchQuestions();
+    // Questions will be fetched when selectLaw is called or manually here if needed
+    if (state.selectedLawId != null) {
+      await _fetchQuestions();
+    }
     emit(state.copyWith(isLoading: false));
   }
 
   Future<void> _fetchLaws() async {
     final result = await getLaws();
-    result.fold(
-      (failure) => emit(state.copyWith(failure: failure)),
-      (laws) {
-        emit(state.copyWith(laws: laws));
-        if (laws.isNotEmpty && state.selectedLawId == null) {
-          selectLaw(laws.first.id);
-        }
-      },
-    );
+    result.fold((failure) => emit(state.copyWith(failure: failure)), (laws) {
+      emit(state.copyWith(laws: laws));
+      if (laws.isNotEmpty && state.selectedLawId == null) {
+        selectLaw(laws.first.id);
+      }
+    });
   }
 
   Future<void> selectLaw(String lawId) async {
-    emit(state.copyWith(selectedLawId: lawId, selectedMaterialId: null, materials: []));
+    emit(
+      state.copyWith(
+        selectedLawId: lawId,
+        selectedMaterialId: null,
+        materials: [],
+      ),
+    );
     await _fetchMaterials(lawId);
+    await _fetchQuestions();
   }
 
   Future<void> _fetchMaterials(String lawId) async {
@@ -75,7 +81,7 @@ class QuestionsCubit extends Cubit<QuestionsState> {
   }
 
   Future<void> _fetchQuestions() async {
-    final result = await getQuestions(NoParams());
+    final result = await getQuestions(state.selectedLawId);
     result.fold(
       (failure) => emit(state.copyWith(failure: failure)),
       (questions) => emit(state.copyWith(questions: questions)),
@@ -87,9 +93,9 @@ class QuestionsCubit extends Cubit<QuestionsState> {
       emit(state.copyWith(failure: const ServerFailure('يرجى اختيار القانون')));
       return;
     }
-    
+
     emit(state.copyWith(isAddingQuestion: true, addQuestionSuccess: false));
-    
+
     final finalQuestion = question.copyWith(
       lawId: state.selectedLawId,
       level: state.selectedLevel,
@@ -97,7 +103,8 @@ class QuestionsCubit extends Cubit<QuestionsState> {
 
     final result = await addQuestion(finalQuestion);
     result.fold(
-      (failure) => emit(state.copyWith(isAddingQuestion: false, failure: failure)),
+      (failure) =>
+          emit(state.copyWith(isAddingQuestion: false, failure: failure)),
       (_) {
         emit(state.copyWith(isAddingQuestion: false, addQuestionSuccess: true));
         _fetchQuestions();
@@ -107,12 +114,19 @@ class QuestionsCubit extends Cubit<QuestionsState> {
 
   Future<void> updateExistingQuestion(Question question) async {
     emit(state.copyWith(isAddingQuestion: true, addQuestionSuccess: false));
-    
+
     final result = await updateQuestion(question);
     result.fold(
-      (failure) => emit(state.copyWith(isAddingQuestion: false, failure: failure)),
+      (failure) =>
+          emit(state.copyWith(isAddingQuestion: false, failure: failure)),
       (_) {
-        emit(state.copyWith(isAddingQuestion: false, addQuestionSuccess: true, editingQuestion: null));
+        emit(
+          state.copyWith(
+            isAddingQuestion: false,
+            addQuestionSuccess: true,
+            editingQuestion: null,
+          ),
+        );
         _fetchQuestions();
       },
     );
@@ -123,7 +137,9 @@ class QuestionsCubit extends Cubit<QuestionsState> {
   }
 
   Future<void> toggleQuestionActive(String questionId, bool isActive) async {
-    final result = await toggleStatus(ToggleQuestionParams(questionId: questionId, isActive: isActive));
+    final result = await toggleStatus(
+      ToggleQuestionParams(questionId: questionId, isActive: isActive),
+    );
     result.fold(
       (failure) => emit(state.copyWith(failure: failure)),
       (_) => _fetchQuestions(),
@@ -151,9 +167,16 @@ class QuestionsCubit extends Cubit<QuestionsState> {
   }
 
   List<Question> get filteredQuestions {
-    if (state.searchQuery.isEmpty) return state.questions;
-    return state.questions
-        .where((q) => q.questionText.toLowerCase().contains(state.searchQuery.toLowerCase()))
-        .toList();
+    return state.questions.where((q) {
+      final matchesLaw =
+          state.selectedLawId == null || q.lawId == state.selectedLawId;
+      final matchesLevel = q.level == state.selectedLevel;
+      final matchesSearch =
+          state.searchQuery.isEmpty ||
+          q.questionText.toLowerCase().contains(
+            state.searchQuery.toLowerCase(),
+          );
+      return matchesLaw && matchesLevel && matchesSearch;
+    }).toList();
   }
 }
