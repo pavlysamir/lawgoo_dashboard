@@ -118,6 +118,11 @@ class LawCard extends StatelessWidget {
                 '${law.materialsCount} مادة',
                 Icons.description_outlined,
               ),
+              const SizedBox(width: 12),
+              _buildStat(
+                '${law.totalQuestions} سؤال',
+                Icons.question_answer_outlined,
+              ),
             ],
           ),
           const SizedBox(height: 12),

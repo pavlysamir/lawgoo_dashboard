@@ -17,13 +17,23 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
 
   @override
   Future<void> addQuestion(QuestionModel question) async {
+    final batch = firestore.batch();
     final docRef = firestore.collection('questions').doc();
     final data = question.toJson();
     data['question_id'] = docRef.id;
     data['created_at'] = FieldValue.serverTimestamp();
     data['updated_at'] = FieldValue.serverTimestamp();
     data['is_deleted'] = false;
-    await docRef.set(data);
+
+    batch.set(docRef, data);
+
+    // Increment totalQuestions in the corresponding law
+    final lawRef = firestore.collection('laws').doc(question.lawId);
+    batch.update(lawRef, {
+      'total_questions': FieldValue.increment(1),
+    });
+
+    await batch.commit();
   }
 
   @override
@@ -68,10 +78,29 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
 
   @override
   Future<void> deleteQuestion(String questionId) async {
-    await firestore.collection('questions').doc(questionId).update({
+    final batch = firestore.batch();
+    final questionRef = firestore.collection('questions').doc(questionId);
+
+    // Get the question to find the lawId
+    final questionDoc = await questionRef.get();
+    if (!questionDoc.exists) return;
+
+    final data = questionDoc.data() as Map<String, dynamic>;
+    final lawId = data['law_id'] as String?;
+
+    batch.update(questionRef, {
       'is_deleted': true,
       'updated_at': FieldValue.serverTimestamp(),
     });
+
+    if (lawId != null) {
+      final lawRef = firestore.collection('laws').doc(lawId);
+      batch.update(lawRef, {
+        'total_questions': FieldValue.increment(-1),
+      });
+    }
+
+    await batch.commit();
   }
 
   @override

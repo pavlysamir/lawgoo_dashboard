@@ -13,6 +13,7 @@ LawModel _$LawModelFromJson(Map<String, dynamic> json) => LawModel(
   completedLevelsCount: (json['completed_levels_count'] as num).toInt(),
   completionPercentage: (json['completion_percentage'] as num).toInt(),
   materialsCount: (json['materials_count'] as num).toInt(),
+  totalQuestions: (json['total_questions'] as num).toInt(),
   createdAt: LawModel._dateTimeFromTimestamp(json['created_at'] as Timestamp),
   isActive: json['is_active'] as bool,
 );
@@ -24,6 +25,7 @@ Map<String, dynamic> _$LawModelToJson(LawModel instance) => <String, dynamic>{
   'completed_levels_count': instance.completedLevelsCount,
   'completion_percentage': instance.completionPercentage,
   'materials_count': instance.materialsCount,
+  'total_questions': instance.totalQuestions,
   'is_active': instance.isActive,
   'created_at': LawModel._dateTimeToTimestamp(instance.createdAt),
 };

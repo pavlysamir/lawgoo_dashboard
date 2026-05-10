@@ -16,6 +16,7 @@ class LawModel extends LawEntity {
     required super.completedLevelsCount,
     required super.completionPercentage,
     required super.materialsCount,
+    required super.totalQuestions,
     required this.createdAt,
     required super.isActive,
   }) : super(
@@ -42,6 +43,7 @@ class LawModel extends LawEntity {
       completedLevelsCount: entity.completedLevelsCount,
       completionPercentage: entity.completionPercentage,
       materialsCount: entity.materialsCount,
+      totalQuestions: entity.totalQuestions,
       createdAt: entity.createdAt,
       isActive: entity.isActive,
     );
