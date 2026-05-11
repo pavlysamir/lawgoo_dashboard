@@ -33,6 +33,15 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
       'total_questions': FieldValue.increment(1),
     });
 
+    // Increment questionsCount in the corresponding law_level
+    final levelRef = firestore
+        .collection('law_levels')
+        .doc('${question.lawId}_level_${question.level}');
+    batch.update(levelRef, {
+      'questions_count': FieldValue.increment(1),
+      'updated_at': FieldValue.serverTimestamp(),
+    });
+
     await batch.commit();
   }
 
@@ -81,12 +90,13 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
     final batch = firestore.batch();
     final questionRef = firestore.collection('questions').doc(questionId);
 
-    // Get the question to find the lawId
+    // Get the question to find the lawId and level
     final questionDoc = await questionRef.get();
     if (!questionDoc.exists) return;
 
     final data = questionDoc.data() as Map<String, dynamic>;
     final lawId = data['law_id'] as String?;
+    final level = data['level'] as int?;
 
     batch.update(questionRef, {
       'is_deleted': true,
@@ -98,6 +108,16 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
       batch.update(lawRef, {
         'total_questions': FieldValue.increment(-1),
       });
+
+      if (level != null) {
+        final levelRef = firestore
+            .collection('law_levels')
+            .doc('${lawId}_level_$level');
+        batch.update(levelRef, {
+          'questions_count': FieldValue.increment(-1),
+          'updated_at': FieldValue.serverTimestamp(),
+        });
+      }
     }
 
     await batch.commit();
@@ -113,11 +133,58 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
 
   @override
   Future<void> updateQuestion(QuestionModel question) async {
+    final batch = firestore.batch();
+    final questionRef =
+        firestore.collection('questions').doc(question.questionId);
+
+    // Get old question data to check for lawId or level changes
+    final questionDoc = await questionRef.get();
+    if (!questionDoc.exists) return;
+
+    final oldData = questionDoc.data() as Map<String, dynamic>;
+    final oldLawId = oldData['law_id'] as String?;
+    final oldLevel = oldData['level'] as int?;
+
+    final newLawId = question.lawId;
+    final newLevel = question.level;
+
     final data = question.toJson();
     data['updated_at'] = FieldValue.serverTimestamp();
-    await firestore
-        .collection('questions')
-        .doc(question.questionId)
-        .update(data);
+
+    batch.update(questionRef, data);
+
+    // Handle Law counter change
+    if (oldLawId != newLawId) {
+      if (oldLawId != null) {
+        batch.update(firestore.collection('laws').doc(oldLawId), {
+          'total_questions': FieldValue.increment(-1),
+        });
+      }
+      batch.update(firestore.collection('laws').doc(newLawId), {
+        'total_questions': FieldValue.increment(1),
+      });
+    }
+
+    // Handle Level counter change
+    if (oldLawId != newLawId || oldLevel != newLevel) {
+      // Decrement old level counter
+      if (oldLawId != null && oldLevel != null) {
+        batch.update(
+            firestore.collection('law_levels').doc('${oldLawId}_level_$oldLevel'),
+            {
+              'questions_count': FieldValue.increment(-1),
+              'updated_at': FieldValue.serverTimestamp(),
+            });
+      }
+      // Increment new level counter
+      batch.update(
+          firestore.collection('law_levels').doc('${newLawId}_level_$newLevel'),
+          {
+            'questions_count': FieldValue.increment(1),
+            'updated_at': FieldValue.serverTimestamp(),
+          });
+    }
+
+    await batch.commit();
   }
 }

@@ -86,14 +86,39 @@ class LawsRemoteDataSourceImpl implements LawsRemoteDataSource {
       'addLaw',
       params: law.toJson(),
       call: () async {
+        final batch = firestore.batch();
         final docRef = firestore.collection('laws').doc();
-        await docRef.set({
+        final lawId = docRef.id;
+
+        // 1. Create Law document
+        batch.set(docRef, {
           ...law.toJson(),
-          'id': docRef.id,
+          'id': lawId,
           'is_deleted': false,
           'updated_at': FieldValue.serverTimestamp(),
           'created_at': FieldValue.serverTimestamp(),
         });
+
+        // 2. Create LawLevels documents
+        for (int i = 1; i <= law.totalLevels; i++) {
+          final levelRef =
+              firestore.collection('law_levels').doc('${lawId}_level_$i');
+          batch.set(levelRef, {
+            'id': levelRef.id,
+            'law_id': lawId,
+            'level_number': i,
+            'title': 'المستوى $i',
+            'questions_count': 0,
+            'expected_duration_minutes': 5,
+            'reward_points': 50,
+            'order': i,
+            'is_active': true,
+            'created_at': FieldValue.serverTimestamp(),
+            'updated_at': FieldValue.serverTimestamp(),
+          });
+        }
+
+        await batch.commit();
       },
     );
   }
