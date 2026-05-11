@@ -174,7 +174,7 @@ class LawsRemoteDataSourceImpl implements LawsRemoteDataSource {
         // 5. Delete associated user_law_progress
         final progressSnapshot = await firestore
             .collection('user_law_progress')
-            .where('law_id', isEqualTo: lawId)
+            .where('lawId', isEqualTo: lawId)
             .get();
         for (var doc in progressSnapshot.docs) {
           batch.delete(doc.reference);
