@@ -129,10 +129,58 @@ class LawsRemoteDataSourceImpl implements LawsRemoteDataSource {
       'deleteLaw',
       params: {'id': lawId},
       call: () async {
-        await firestore.collection('laws').doc(lawId).update({
+        final batch = firestore.batch();
+
+        // 1. Mark law as deleted
+        final lawRef = firestore.collection('laws').doc(lawId);
+        batch.update(lawRef, {
           'is_deleted': true,
           'updated_at': FieldValue.serverTimestamp(),
         });
+
+        // 2. Mark associated materials as deleted
+        final materialsSnapshot = await firestore
+            .collection('materials')
+            .where('law_id', isEqualTo: lawId)
+            .get();
+        for (var doc in materialsSnapshot.docs) {
+          batch.update(doc.reference, {
+            'is_deleted': true,
+            'updated_at': FieldValue.serverTimestamp(),
+          });
+        }
+
+        // 3. Delete associated law_levels
+        final levelsSnapshot = await firestore
+            .collection('law_levels')
+            .where('law_id', isEqualTo: lawId)
+            .get();
+        for (var doc in levelsSnapshot.docs) {
+          batch.delete(doc.reference);
+        }
+
+        // 4. Mark associated questions as deleted
+        final questionsSnapshot = await firestore
+            .collection('questions')
+            .where('law_id', isEqualTo: lawId)
+            .get();
+        for (var doc in questionsSnapshot.docs) {
+          batch.update(doc.reference, {
+            'is_deleted': true,
+            'updated_at': FieldValue.serverTimestamp(),
+          });
+        }
+
+        // 5. Delete associated user_law_progress
+        final progressSnapshot = await firestore
+            .collection('user_law_progress')
+            .where('law_id', isEqualTo: lawId)
+            .get();
+        for (var doc in progressSnapshot.docs) {
+          batch.delete(doc.reference);
+        }
+
+        await batch.commit();
       },
     );
   }
