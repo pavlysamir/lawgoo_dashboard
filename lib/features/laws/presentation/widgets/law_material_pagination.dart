@@ -36,12 +36,16 @@ class LawMaterialPagination extends StatelessWidget {
         Row(
           children: [
             IconButton(
-              onPressed: currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
+              onPressed: currentPage > 1
+                  ? () => onPageChanged(currentPage - 1)
+                  : null,
               icon: const Icon(Icons.chevron_left, size: 20),
             ),
             ..._buildPageNumbers(totalPages),
             IconButton(
-              onPressed: currentPage < totalPages ? () => onPageChanged(currentPage + 1) : null,
+              onPressed: currentPage < totalPages
+                  ? () => onPageChanged(currentPage + 1)
+                  : null,
               icon: const Icon(Icons.chevron_right, size: 20),
             ),
           ],
@@ -51,18 +55,36 @@ class LawMaterialPagination extends StatelessWidget {
   }
 
   List<Widget> _buildPageNumbers(int totalPages) {
-    List<Widget> buttons = [];
-    
-    // Simplified logic: show 1, 2, 3, ..., last
-    for (int i = 1; i <= totalPages; i++) {
-      if (i <= 3 || i == totalPages) {
-        buttons.add(_buildPageButton(i));
-      } else if (i == 4) {
-        buttons.add(const Text('...', style: TextStyle(color: Colors.grey)));
-      }
+    final buttons = <Widget>[];
+    final pages = <int>{1, totalPages};
+
+    if (totalPages <= 7) {
+      pages.addAll(List.generate(totalPages, (index) => index + 1));
+    } else {
+      pages.addAll([
+        currentPage - 1,
+        currentPage,
+        currentPage + 1,
+      ].where((page) => page > 1 && page < totalPages));
     }
-    
+
+    int? previousPage;
+    for (final page in pages.toList()..sort()) {
+      if (previousPage != null && page - previousPage > 1) {
+        buttons.add(_buildEllipsis());
+      }
+      buttons.add(_buildPageButton(page));
+      previousPage = page;
+    }
+
     return buttons;
+  }
+
+  Widget _buildEllipsis() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4),
+      child: Text('...', style: TextStyle(color: Colors.grey)),
+    );
   }
 
   Widget _buildPageButton(int page) {

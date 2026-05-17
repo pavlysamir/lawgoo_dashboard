@@ -8,6 +8,8 @@ import '../../domain/usecases/update_law_material_use_case.dart';
 import 'law_materials_state.dart';
 
 class LawMaterialsCubit extends Cubit<LawMaterialsState> {
+  static const int _itemsPerPage = 4;
+
   final AddLawMaterialUseCase addLawMaterial;
   final GetLawMaterialsUseCase getLawMaterials;
   final DeleteLawMaterialUseCase deleteLawMaterial;
@@ -33,30 +35,27 @@ class LawMaterialsCubit extends Cubit<LawMaterialsState> {
   Future<void> _fetchPage(int page, {String? query}) async {
     if (_lawId == null) return;
 
-    final result = await getLawMaterials(
-      lawId: _lawId!,
-      limit: 4,
-      searchQuery: query,
-      // For simple page-based pagination with 4 items, we might need a different approach if using startAfterDocument.
-      // But for small lists or order-based, we can just fetch and handle it.
-      // However, for consistency with the design (1, 2, 3, 9 ...), it looks like standard page buttons.
-    );
-
     final countResult = await getLawMaterialsCount(_lawId!);
+    await countResult.fold(
+      (failure) async => emit(LawMaterialsState.error(failure)),
+      (total) async {
+        final safePage = _getSafePage(page, total);
+        final result = await getLawMaterials(
+          lawId: _lawId!,
+          limit: safePage * _itemsPerPage,
+          searchQuery: query,
+        );
 
-    result.fold(
-      (failure) => emit(LawMaterialsState.error(failure)),
-      (materials) {
-        countResult.fold(
+        result.fold(
           (failure) => emit(LawMaterialsState.error(failure)),
-          (total) {
-            emit(LawMaterialsState.success(
-              materials: materials,
+          (materials) => emit(
+            LawMaterialsState.success(
+              materials: _getPageItems(materials, safePage),
               totalMaterials: total,
-              currentPage: page,
+              currentPage: safePage,
               searchQuery: query,
-            ));
-          },
+            ),
+          ),
         );
       },
     );
@@ -66,48 +65,13 @@ class LawMaterialsCubit extends Cubit<LawMaterialsState> {
     state.maybeMap(
       success: (s) async {
         if (s.isPaginating) return;
+        final totalPages = (s.totalMaterials / s.itemsPerPage).ceil();
+        if (page < 1 || page > totalPages || page == s.currentPage) return;
+
         emit(s.copyWith(isPaginating: true, currentPage: page));
-        
-        // In a real Firestore app, page-based pagination is tricky without offsets.
-        // For 4 items/page, we can fetch with limit = page * 4 and take the last 4,
-        // or use document snapshots. For this dashboard, we'll fetch with limit 4 and startAfter.
-        // Simplified for now:
-        await _fetchMaterialsForPage(page, s.searchQuery);
+        await _fetchPage(page, query: s.searchQuery);
       },
       orElse: () {},
-    );
-  }
-
-  Future<void> _fetchMaterialsForPage(int page, String? query) async {
-    if (_lawId == null) return;
-    
-    // For 4 items/page, if we want page 2, we need the last item of page 1.
-    // This requires keeping track of snapshots or fetching with offset (not native in Firestore).
-    // Given the "each screen get four items" and "1 2 3 ... 9" buttons, 
-    // we'll implement a simplified pagination for now.
-    
-    final result = await getLawMaterials(
-      lawId: _lawId!,
-      limit: 4,
-      // lastMaterial: ... would go here if we had it.
-      searchQuery: query,
-    );
-
-    result.fold(
-      (failure) => emit(state.maybeMap(
-        success: (s) => s.copyWith(isPaginating: false, operationFailure: failure),
-        orElse: () => LawMaterialsState.error(failure),
-      )),
-      (materials) {
-        emit(state.maybeMap(
-          success: (s) => s.copyWith(
-            isPaginating: false,
-            materials: materials,
-            currentPage: page,
-          ),
-          orElse: () => LawMaterialsState.initial(), // Should not happen
-        ));
-      },
     );
   }
 
@@ -140,7 +104,9 @@ class LawMaterialsCubit extends Cubit<LawMaterialsState> {
         final result = await addLawMaterial(material);
 
         result.fold(
-          (failure) => emit(s.copyWith(isAddingMaterial: false, operationFailure: failure)),
+          (failure) => emit(
+            s.copyWith(isAddingMaterial: false, operationFailure: failure),
+          ),
           (_) => init(_lawId!), // Refresh
         );
       },
@@ -163,7 +129,9 @@ class LawMaterialsCubit extends Cubit<LawMaterialsState> {
         final result = await updateLawMaterial(updatedMaterial);
 
         result.fold(
-          (failure) => emit(s.copyWith(isUpdatingMaterial: false, operationFailure: failure)),
+          (failure) => emit(
+            s.copyWith(isUpdatingMaterial: false, operationFailure: failure),
+          ),
           (_) {
             emit(s.copyWith(isUpdatingMaterial: false, editingMaterial: null));
             init(_lawId!); // Refresh
@@ -182,7 +150,9 @@ class LawMaterialsCubit extends Cubit<LawMaterialsState> {
         final result = await deleteLawMaterial(id);
 
         result.fold(
-          (failure) => emit(s.copyWith(isDeletingMaterial: false, operationFailure: failure)),
+          (failure) => emit(
+            s.copyWith(isDeletingMaterial: false, operationFailure: failure),
+          ),
           (_) => init(_lawId!), // Refresh
         );
       },
@@ -195,5 +165,23 @@ class LawMaterialsCubit extends Cubit<LawMaterialsState> {
       success: (s) => emit(s.copyWith(editingMaterial: material)),
       orElse: () {},
     );
+  }
+
+  int _getSafePage(int page, int totalItems) {
+    final totalPages = (totalItems / _itemsPerPage).ceil();
+    if (totalPages == 0) return 1;
+    return page.clamp(1, totalPages).toInt();
+  }
+
+  List<LawMaterialEntity> _getPageItems(
+    List<LawMaterialEntity> materials,
+    int page,
+  ) {
+    final startIndex = (page - 1) * _itemsPerPage;
+    if (startIndex >= materials.length) return const [];
+    final endIndex = startIndex + _itemsPerPage > materials.length
+        ? materials.length
+        : startIndex + _itemsPerPage;
+    return materials.sublist(startIndex, endIndex);
   }
 }
