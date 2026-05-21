@@ -70,6 +70,7 @@ class _AddQuestionsPageState extends State<AddQuestionsPage> {
                 // 3. Questions List Section
                 QuestionsListSection(
                   questions: context.read<QuestionsCubit>().filteredQuestions,
+                  materials: state.materials,
                   onToggleStatus: (id, isActive) => context
                       .read<QuestionsCubit>()
                       .toggleQuestionActive(id, isActive),

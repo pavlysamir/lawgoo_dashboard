@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_text_styles.dart';
+import '../../../laws/domain/entities/law_material_entity.dart';
 import '../../domain/entities/question.dart';
 import 'custom_switcher.dart';
 
 class QuestionsListSection extends StatelessWidget {
   final List<Question> questions;
+  final List<LawMaterialEntity> materials;
   final Function(String, bool) onToggleStatus;
   final Function(String) onDelete;
   final Function(Question) onEdit;
@@ -14,6 +16,7 @@ class QuestionsListSection extends StatelessWidget {
   const QuestionsListSection({
     super.key,
     required this.questions,
+    required this.materials,
     required this.onToggleStatus,
     required this.onDelete,
     required this.onEdit,
@@ -85,6 +88,7 @@ class QuestionsListSection extends StatelessWidget {
             columnSpacing: 24,
             columns: const [
               DataColumn(label: Text('حالة السؤال', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold))),
+              DataColumn(label: Text('المادة', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold))),
               DataColumn(label: Text('نص السؤال', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold))),
               DataColumn(label: Text('الصعوبة', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold))),
               DataColumn(label: Text('النوع', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold))),
@@ -99,6 +103,7 @@ class QuestionsListSection extends StatelessWidget {
                       onChanged: (val) => onToggleStatus(q.questionId!, val),
                     ),
                   ),
+                  DataCell(_buildMaterialOrder(q.materialId)),
                   DataCell(
                     SizedBox(
                       width: 300,
@@ -132,6 +137,26 @@ class QuestionsListSection extends StatelessWidget {
           const SizedBox(height: 12),
           _buildPagination(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMaterialOrder(String materialId) {
+    int? materialOrder;
+    for (final material in materials) {
+      if (material.id == materialId) {
+        materialOrder = material.order;
+        break;
+      }
+    }
+
+    return Text(
+      materialOrder == null ? '-' : 'المادة $materialOrder',
+      style: const TextStyle(
+        fontFamily: 'Cairo',
+        fontSize: 13,
+        color: AppColors.grey600,
+        fontWeight: FontWeight.w600,
       ),
     );
   }
