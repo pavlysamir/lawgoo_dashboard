@@ -8,6 +8,7 @@ class LawEntity extends Equatable {
   final int completionPercentage;
   final int materialsCount;
   final int totalQuestions;
+  final int totalActiveQuestions;
   final DateTime createdAt;
   final bool isActive;
 
@@ -19,6 +20,7 @@ class LawEntity extends Equatable {
     required this.completionPercentage,
     required this.materialsCount,
     required this.totalQuestions,
+    required this.totalActiveQuestions,
     required this.createdAt,
     required this.isActive,
   });
@@ -31,6 +33,7 @@ class LawEntity extends Equatable {
     int? completionPercentage,
     int? materialsCount,
     int? totalQuestions,
+    int? totalActiveQuestions,
     DateTime? createdAt,
     bool? isActive,
   }) {
@@ -42,6 +45,8 @@ class LawEntity extends Equatable {
       completionPercentage: completionPercentage ?? this.completionPercentage,
       materialsCount: materialsCount ?? this.materialsCount,
       totalQuestions: totalQuestions ?? this.totalQuestions,
+      totalActiveQuestions:
+          totalActiveQuestions ?? this.totalActiveQuestions,
       createdAt: createdAt ?? this.createdAt,
       isActive: isActive ?? this.isActive,
     );
@@ -56,6 +61,7 @@ class LawEntity extends Equatable {
         completionPercentage,
         materialsCount,
         totalQuestions,
+        totalActiveQuestions,
         createdAt,
         isActive,
       ];

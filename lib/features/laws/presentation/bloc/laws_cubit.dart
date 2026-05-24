@@ -103,6 +103,7 @@ class LawsCubit extends Cubit<LawsState> {
           completionPercentage: 0,
           materialsCount: 0,
           totalQuestions: 0,
+          totalActiveQuestions: 0,
           createdAt: DateTime.now(),
           isActive: false,
         );

@@ -17,6 +17,7 @@ class LawModel extends LawEntity {
     required super.completionPercentage,
     required super.materialsCount,
     required super.totalQuestions,
+    @JsonKey(defaultValue: 0) required super.totalActiveQuestions,
     required this.createdAt,
     required super.isActive,
   }) : super(
@@ -44,6 +45,7 @@ class LawModel extends LawEntity {
       completionPercentage: entity.completionPercentage,
       materialsCount: entity.materialsCount,
       totalQuestions: entity.totalQuestions,
+      totalActiveQuestions: entity.totalActiveQuestions,
       createdAt: entity.createdAt,
       isActive: entity.isActive,
     );

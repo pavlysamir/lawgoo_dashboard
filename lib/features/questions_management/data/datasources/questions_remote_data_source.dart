@@ -15,6 +15,27 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
 
   QuestionsRemoteDataSourceImpl({required this.firestore});
 
+  Future<Map<String, Object>> _activeQuestionsCounterUpdate(
+    String lawId,
+    int delta,
+  ) async {
+    if (delta >= 0) {
+      return {
+        'total_active_questions': FieldValue.increment(delta),
+      };
+    }
+
+    final lawRef = firestore.collection('laws').doc(lawId);
+    final lawDoc = await lawRef.get();
+    final currentCount =
+        (lawDoc.data()?['total_active_questions'] as num?)?.toInt() ?? 0;
+    final nextCount = currentCount + delta;
+
+    return {
+      'total_active_questions': nextCount < 0 ? 0 : nextCount,
+    };
+  }
+
   @override
   Future<void> addQuestion(QuestionModel question) async {
     final batch = firestore.batch();
@@ -31,6 +52,7 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
     final lawRef = firestore.collection('laws').doc(question.lawId);
     batch.update(lawRef, {
       'total_questions': FieldValue.increment(1),
+      if (question.isActive) 'total_active_questions': FieldValue.increment(1),
     });
 
     if (question.isActive) {
@@ -98,17 +120,26 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
       'updated_at': FieldValue.serverTimestamp(),
     });
 
-    if (!isDeleted &&
-        oldIsActive != isActive &&
-        lawId != null &&
-        level != null) {
-      final levelRef = firestore
-          .collection('law_levels')
-          .doc('${lawId}_level_$level');
-      batch.update(levelRef, {
-        'questions_count': FieldValue.increment(isActive ? 1 : -1),
+    if (!isDeleted && oldIsActive != isActive && lawId != null) {
+      final activeCounterUpdate = await _activeQuestionsCounterUpdate(
+        lawId,
+        isActive ? 1 : -1,
+      );
+
+      batch.update(firestore.collection('laws').doc(lawId), {
+        ...activeCounterUpdate,
         'updated_at': FieldValue.serverTimestamp(),
       });
+
+      if (level != null) {
+        final levelRef = firestore
+            .collection('law_levels')
+            .doc('${lawId}_level_$level');
+        batch.update(levelRef, {
+          'questions_count': FieldValue.increment(isActive ? 1 : -1),
+          'updated_at': FieldValue.serverTimestamp(),
+        });
+      }
     }
 
     await batch.commit();
@@ -134,9 +165,14 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
     });
 
     if (lawId != null) {
+      final activeCounterUpdate = isActive
+          ? await _activeQuestionsCounterUpdate(lawId, -1)
+          : <String, Object>{};
       final lawRef = firestore.collection('laws').doc(lawId);
       batch.update(lawRef, {
         'total_questions': FieldValue.increment(-1),
+        ...activeCounterUpdate,
+        'updated_at': FieldValue.serverTimestamp(),
       });
 
       if (isActive && level != null) {
@@ -186,15 +222,42 @@ class QuestionsRemoteDataSourceImpl implements QuestionsRemoteDataSource {
 
     batch.update(questionRef, data);
 
-    // Handle Law counter change
-    if (oldLawId != newLawId) {
-      if (oldLawId != null) {
-        batch.update(firestore.collection('laws').doc(oldLawId), {
-          'total_questions': FieldValue.increment(-1),
-        });
-      }
-      batch.update(firestore.collection('laws').doc(newLawId), {
-        'total_questions': FieldValue.increment(1),
+    final totalQuestionDeltas = <String, int>{};
+    final activeQuestionDeltas = <String, int>{};
+
+    void addDelta(Map<String, int> deltas, String? lawId, int value) {
+      if (lawId == null || lawId.isEmpty || value == 0) return;
+      deltas[lawId] = (deltas[lawId] ?? 0) + value;
+    }
+
+    // Handle law counters.
+    if (!isDeleted && oldLawId != newLawId) {
+      addDelta(totalQuestionDeltas, oldLawId, -1);
+      addDelta(totalQuestionDeltas, newLawId, 1);
+    }
+
+    if (!isDeleted &&
+        (oldLawId != newLawId || oldIsActive != newIsActive)) {
+      if (oldIsActive) addDelta(activeQuestionDeltas, oldLawId, -1);
+      if (newIsActive) addDelta(activeQuestionDeltas, newLawId, 1);
+    }
+
+    final affectedLawIds = {
+      ...totalQuestionDeltas.keys,
+      ...activeQuestionDeltas.keys,
+    };
+
+    for (final lawId in affectedLawIds) {
+      final activeDelta = activeQuestionDeltas[lawId] ?? 0;
+      final activeCounterUpdate = activeDelta != 0
+          ? await _activeQuestionsCounterUpdate(lawId, activeDelta)
+          : <String, Object>{};
+
+      batch.update(firestore.collection('laws').doc(lawId), {
+        if ((totalQuestionDeltas[lawId] ?? 0) != 0)
+          'total_questions': FieldValue.increment(totalQuestionDeltas[lawId]!),
+        ...activeCounterUpdate,
+        'updated_at': FieldValue.serverTimestamp(),
       });
     }
 
