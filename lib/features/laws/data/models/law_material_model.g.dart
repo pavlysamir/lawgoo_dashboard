@@ -12,6 +12,7 @@ LawMaterialModel _$LawMaterialModelFromJson(Map<String, dynamic> json) =>
       lawId: json['law_id'] as String,
       content: json['content'] as String,
       order: (json['order'] as num).toInt(),
+      title: json['title'] as String? ?? '',
       createdAt: LawMaterialModel._dateTimeFromTimestamp(
         json['created_at'] as Timestamp,
       ),
@@ -26,6 +27,7 @@ Map<String, dynamic> _$LawMaterialModelToJson(LawMaterialModel instance) =>
       'law_id': instance.lawId,
       'content': instance.content,
       'order': instance.order,
+      'title': instance.title,
       'created_at': LawMaterialModel._dateTimeToTimestamp(instance.createdAt),
       'updated_at': LawMaterialModel._dateTimeToTimestamp(instance.updatedAt),
     };

@@ -85,7 +85,7 @@ class LawMaterialsCubit extends Cubit<LawMaterialsState> {
     );
   }
 
-  Future<void> addNewMaterial(String content, int order) async {
+  Future<void> addNewMaterial(String title, String content, int order) async {
     if (_lawId == null) return;
 
     state.maybeMap(
@@ -95,6 +95,7 @@ class LawMaterialsCubit extends Cubit<LawMaterialsState> {
         final material = LawMaterialEntity(
           id: '',
           lawId: _lawId!,
+          title: title,
           content: content,
           order: order,
           createdAt: DateTime.now(),
@@ -114,13 +115,14 @@ class LawMaterialsCubit extends Cubit<LawMaterialsState> {
     );
   }
 
-  Future<void> updateExistingMaterial(String content, int order) async {
+  Future<void> updateExistingMaterial(String title, String content, int order) async {
     state.maybeMap(
       success: (s) async {
         if (s.editingMaterial == null) return;
         emit(s.copyWith(isUpdatingMaterial: true, operationFailure: null));
 
         final updatedMaterial = s.editingMaterial!.copyWith(
+          title: title,
           content: content,
           order: order,
           updatedAt: DateTime.now(),

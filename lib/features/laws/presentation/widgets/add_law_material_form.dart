@@ -23,12 +23,14 @@ class AddLawMaterialForm extends StatefulWidget {
 class _AddLawMaterialFormState extends State<AddLawMaterialForm> {
   late final TextEditingController _contentController;
   late final TextEditingController _orderController;
+  late final TextEditingController _titleController;
 
   @override
   void initState() {
     super.initState();
     _contentController = TextEditingController(text: widget.editingMaterial?.content ?? '');
     _orderController = TextEditingController(text: widget.editingMaterial?.order.toString() ?? '');
+    _titleController = TextEditingController(text: widget.editingMaterial?.title ?? '');
   }
 
   @override
@@ -37,6 +39,7 @@ class _AddLawMaterialFormState extends State<AddLawMaterialForm> {
     if (widget.editingMaterial != oldWidget.editingMaterial) {
       _contentController.text = widget.editingMaterial?.content ?? '';
       _orderController.text = widget.editingMaterial?.order.toString() ?? '';
+      _titleController.text = widget.editingMaterial?.title ?? '';
     }
   }
 
@@ -44,6 +47,7 @@ class _AddLawMaterialFormState extends State<AddLawMaterialForm> {
   void dispose() {
     _contentController.dispose();
     _orderController.dispose();
+    _titleController.dispose();
     super.dispose();
   }
 
@@ -99,24 +103,40 @@ class _AddLawMaterialFormState extends State<AddLawMaterialForm> {
                 ),
               ),
               const SizedBox(width: 24),
-              // Content Field
+              // Title Field
               Expanded(
                 flex: 3,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     const Text(
-                      'نص المادة',
+                      'عنوان المادة',
                       style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                     const SizedBox(height: 8),
                     _buildTextField(
-                      controller: _contentController,
-                      hintText: 'أدخل نص المادة القانونية هنا بالتفصيل...',
-                      maxLines: 4,
+                      controller: _titleController,
+                      hintText: 'أدخل عنوان المادة (اختياري)...',
                     ),
                   ],
                 ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // Content Field
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const Text(
+                'نص المادة',
+                style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              const SizedBox(height: 8),
+              _buildTextField(
+                controller: _contentController,
+                hintText: 'أدخل نص المادة القانونية هنا بالتفصيل...',
+                maxLines: 4,
               ),
             ],
           ),
@@ -196,13 +216,14 @@ class _AddLawMaterialFormState extends State<AddLawMaterialForm> {
     final content = _contentController.text.trim();
     final orderStr = _orderController.text.trim();
     final order = int.tryParse(orderStr);
+    final title = _titleController.text.trim();
 
     if (content.isEmpty || order == null) return;
 
     if (widget.editingMaterial != null) {
-      context.read<LawMaterialsCubit>().updateExistingMaterial(content, order);
+      context.read<LawMaterialsCubit>().updateExistingMaterial(title, content, order);
     } else {
-      context.read<LawMaterialsCubit>().addNewMaterial(content, order);
+      context.read<LawMaterialsCubit>().addNewMaterial(title, content, order);
     }
   }
 }

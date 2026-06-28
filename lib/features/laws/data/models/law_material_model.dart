@@ -6,6 +6,10 @@ part 'law_material_model.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class LawMaterialModel extends LawMaterialEntity {
+  @override
+  @JsonKey(defaultValue: '')
+  final String title;
+
   @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToTimestamp)
   final DateTime createdAt;
   @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToTimestamp)
@@ -16,18 +20,13 @@ class LawMaterialModel extends LawMaterialEntity {
     required super.lawId,
     required super.content,
     required super.order,
+    this.title = '',
     required this.createdAt,
     required this.updatedAt,
-  }) : super(
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-        );
+  }) : super(title: title, createdAt: createdAt, updatedAt: updatedAt);
 
   factory LawMaterialModel.fromJson(Map<String, dynamic> json, String id) {
-    return _$LawMaterialModelFromJson({
-      ...json,
-      'id': id,
-    });
+    return _$LawMaterialModelFromJson({...json, 'id': id});
   }
 
   Map<String, dynamic> toJson() {
@@ -48,6 +47,7 @@ class LawMaterialModel extends LawMaterialEntity {
       lawId: entity.lawId,
       content: entity.content,
       order: entity.order,
+      title: entity.title,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );

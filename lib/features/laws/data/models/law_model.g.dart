@@ -14,8 +14,7 @@ LawModel _$LawModelFromJson(Map<String, dynamic> json) => LawModel(
   completionPercentage: (json['completion_percentage'] as num).toInt(),
   materialsCount: (json['materials_count'] as num).toInt(),
   totalQuestions: (json['total_questions'] as num).toInt(),
-  totalActiveQuestions:
-      (json['total_active_questions'] as num?)?.toInt() ?? 0,
+  totalActiveQuestions: (json['total_active_questions'] as num?)?.toInt() ?? 0,
   createdAt: LawModel._dateTimeFromTimestamp(json['created_at'] as Timestamp),
   isActive: json['is_active'] as bool,
 );

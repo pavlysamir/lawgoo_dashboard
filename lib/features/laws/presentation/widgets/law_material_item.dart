@@ -62,16 +62,37 @@ class LawMaterialItem extends StatelessWidget {
           ),
           const SizedBox(width: 24),
 
-          // Material Text
+          // Material Text & Title
           Expanded(
             flex: 8,
-            child: Text(
-              material.content,
-              textAlign: TextAlign.right,
-              textDirection: TextDirection.rtl,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.font14Regular.copyWith(fontFamily: 'Cairo'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (material.title.isNotEmpty) ...[
+                  Text(
+                    material.title,
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.font14Regular.copyWith(
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                Text(
+                  material.content,
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.font14Regular.copyWith(fontFamily: 'Cairo'),
+                ),
+              ],
             ),
           ),
 
