@@ -305,13 +305,15 @@ class _AddQuestionFormState extends State<AddQuestionForm> {
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _selectedMaterialId,
+                        isExpanded: true,
                         decoration: _inputDecoration('إختر المادة'),
                         items: widget.materials.map((m) {
                           return DropdownMenuItem(
                             value: m.id,
                             child: Text(
-                              'المادة ${m.order}',
+                              'المادة ${m.order}${m.title.isNotEmpty ? ' - ${m.title}' : ''}',
                               style: const TextStyle(fontFamily: 'Cairo'),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           );
                         }).toList(),
